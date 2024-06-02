@@ -5,8 +5,9 @@ A world written in Java
 Players can "only" control themselves using Java code
 
 ## Player code template
+
 ```java
-import com.wavjaby.javaworld.adapter.*;
+
 
 public class Main extends PlayerApplication {
     @Override
@@ -25,7 +26,6 @@ public class Main extends PlayerApplication {
 
 ```java
 import com.almasb.fxgl.core.math.Vec2;
-import com.wavjaby.javaworld.adapter.*;
 
 import java.text.DecimalFormat;
 

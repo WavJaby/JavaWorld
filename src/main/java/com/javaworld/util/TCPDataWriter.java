@@ -1,6 +1,6 @@
 package com.javaworld.util;
 
-import com.wavjaby.serializer.Serializer;
+import com.wavjaby.serializer.Serializable;
 
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
@@ -38,7 +38,7 @@ public class TCPDataWriter implements Closeable {
         out.write(data, 0, data.length);
     }
 
-    public void write(Serializer object) throws IOException {
+    public void write(Serializable object) throws IOException {
         if (object == null) return;
         write(object.serialize());
     }

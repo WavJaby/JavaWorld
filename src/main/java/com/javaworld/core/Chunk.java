@@ -1,8 +1,8 @@
 package com.javaworld.core;
 
+import com.javaworld.core.block.Block;
 import com.javaworld.core.block.BlockData;
 import com.javaworld.core.block.BlockState;
-import com.javaworld.core.block.Block;
 
 public class Chunk implements com.javaworld.adapter.block.Chunk {
     private final Block[][] blocks = new Block[CHUNK_HEIGHT][CHUNK_SIZE * CHUNK_SIZE];

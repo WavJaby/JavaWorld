@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 
 @Serializable
 @AllArgsConstructor
-public class ServerResponse extends ServerResponseSerializer {
-    public final boolean success;
-    public final String message;
+public class WorldChunkUpdate extends WorldChunkUpdateSerializer {
+
 }

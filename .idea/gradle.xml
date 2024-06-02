@@ -12,6 +12,7 @@
             <option value="$PROJECT_DIR$/JavaWorldAdapter" />
             <option value="$PROJECT_DIR$/PlayerExample" />
             <option value="$PROJECT_DIR$/Serializer" />
+            <option value="$PROJECT_DIR$/SerializerProcessor" />
           </set>
         </option>
       </GradleProjectSettings>

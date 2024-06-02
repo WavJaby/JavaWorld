@@ -1,6 +1,6 @@
 package com.javaworld.util;
 
-import com.wavjaby.serializer.Serializer;
+import com.wavjaby.serializer.Serializable;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
@@ -80,7 +80,7 @@ public class TCPDataReader implements Closeable {
         }
     }
 
-    public Serializer readObject() throws IOException {
+    public Serializable readObject() throws IOException {
         byte[] data = read();
         if (data == null)
             return null;
@@ -88,7 +88,7 @@ public class TCPDataReader implements Closeable {
         if (classId >= serialClassId.length)
             return null;
         try {
-            return (Serializer) serialClassId[classId].invoke(null, (Object) data);
+            return (Serializable) serialClassId[classId].invoke(null, (Object) data);
         } catch (IllegalAccessException | InvocationTargetException ignore) {
         }
         return null;

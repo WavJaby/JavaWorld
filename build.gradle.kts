@@ -1,5 +1,6 @@
 plugins {
     application
+    id("org.openjfx.javafxplugin") version "0.1.0"
 }
 
 group = "com.wavjaby"
@@ -9,12 +10,21 @@ repositories {
     mavenCentral()
 }
 
-dependencies {
-    implementation(files("JavaWorldAdapter/build/libs/JavaWorldAdapter-1.0-SNAPSHOT.jar"))
-//    implementation(project("JavaWorldAdapter"))
+javafx {
+    version = "17.0.11"
+    modules("javafx.graphics", "javafx.media")
+}
 
-    implementation(project("Serializer"))
-    annotationProcessor(project("Serializer"))
+dependencies {
+    implementation("com.github.almasb:fxgl-core:17.3") {
+        exclude("org.openjfx")
+    }
+
+    implementation(project(":JavaWorldAdapter"))
+
+    implementation(project(":Serializer"))
+    compileOnly(project(":SerializerProcessor"))
+    annotationProcessor(project(":SerializerProcessor"))
 
     compileOnly("org.projectlombok:lombok:1.18.32")
     annotationProcessor("org.projectlombok:lombok:1.18.32")

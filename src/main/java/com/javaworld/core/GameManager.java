@@ -1,15 +1,15 @@
 package com.javaworld.core;
 
 import com.almasb.fxgl.core.math.Vec2;
+import com.javaworld.core.block.Block;
+import com.javaworld.core.block.BlockData;
+import com.javaworld.core.block.BlockState;
 import com.javaworld.core.entity.Entity;
 import com.javaworld.core.entity.EntityData;
 import com.javaworld.core.jwblocks.Grass;
 import com.javaworld.core.jwblocks.Stone;
 import com.javaworld.core.jwentities.Self;
 import com.javaworld.core.jwentities.Tree;
-import com.javaworld.core.block.Block;
-import com.javaworld.core.block.BlockData;
-import com.javaworld.core.block.BlockState;
 import com.javaworld.data.PlayerConsoleOutput;
 import com.javaworld.data.WorldEntityUpdate;
 import com.javaworld.server.ClientHandler;

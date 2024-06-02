@@ -10,11 +10,14 @@ repositories {
     mavenCentral()
 }
 
-tasks.jar {
+tasks.register<Jar>("adapterJar") {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     includeEmptyDirs = false
+    archiveBaseName = "JWAdapter"
 
-    configurations["compileClasspath"].forEach { file: File ->
+    from(sourceSets.main.get().output)
+
+    configurations["runtimeClasspath"].forEach { file: File ->
         if (file.nameWithoutExtension.startsWith("fxgl-core") ||
             file.nameWithoutExtension.startsWith("javafx-graphics")
         ) {
@@ -35,7 +38,7 @@ tasks.jar {
 
 javafx {
     version = "17.0.11"
-    modules("javafx.graphics")
+    modules("javafx.graphics", "javafx.media")
 }
 
 dependencies {

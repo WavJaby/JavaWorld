@@ -1,12 +1,12 @@
 package com.javaworld.server;
 
 import com.javaworld.core.jwentities.Self;
-import com.javaworld.data.PlayerLogin;
 import com.javaworld.data.PlayerCodeUpload;
+import com.javaworld.data.PlayerLogin;
 import com.javaworld.data.ServerResponse;
 import com.javaworld.util.TCPDataReader;
 import com.javaworld.util.TCPDataWriter;
-import com.wavjaby.serializer.Serializer;
+import com.wavjaby.serializer.Serializable;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -35,7 +35,7 @@ public class ClientHandler implements Runnable {
         this.out = new TCPDataWriter(socket.getOutputStream());
     }
 
-    private Serializer onReceive(Serializer data) {
+    private Serializable onReceive(Serializable data) {
         if (data instanceof PlayerCodeUpload playerCode) {
             CompiledResult result = compiler.compileCode(playerCode.sourceCode);
             if (result.success) compiled = result;
@@ -50,7 +50,7 @@ public class ClientHandler implements Runnable {
     @Override
     public void run() {
         try {
-            Serializer login = in.readObject();
+            Serializable login = in.readObject();
             if (login instanceof PlayerLogin playerLogin) {
                 name = playerLogin.name;
                 if (name == null || name.isBlank())
@@ -73,7 +73,7 @@ public class ClientHandler implements Runnable {
 
     private void receiverLoop() throws IOException {
         while (true) {
-            Serializer data = in.readObject();
+            Serializable data = in.readObject();
             // Connection close
             if (data == null) break;
 
@@ -88,7 +88,7 @@ public class ClientHandler implements Runnable {
             in.close();
             out.close();
             socket.close();
-            compiled.close();
+            if (compiled != null) compiled.close();
         } catch (IOException ex) {
             logger.log(Level.SEVERE, ex.getMessage(), ex);
         }

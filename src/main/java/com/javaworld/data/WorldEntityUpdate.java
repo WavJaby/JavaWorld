@@ -1,9 +1,9 @@
 package com.javaworld.data;
 
 import com.almasb.fxgl.core.math.Vec2;
-import com.javaworld.core.EntityUpdate;
 import com.javaworld.adapter.entity.EntityType;
-import com.wavjaby.serializer.Serializable;
+import com.javaworld.core.EntityUpdate;
+import com.wavjaby.serializer.processor.Serializable;
 import lombok.AllArgsConstructor;
 
 import java.util.ArrayList;

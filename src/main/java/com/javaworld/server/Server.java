@@ -1,8 +1,8 @@
 package com.javaworld.server;
 
+import com.javaworld.client.ClientTest;
 import com.javaworld.core.GameManager;
 import com.javaworld.util.CustomThreadFactory;
-import com.javaworld.client.ClientTest;
 
 import java.io.IOException;
 import java.net.ServerSocket;

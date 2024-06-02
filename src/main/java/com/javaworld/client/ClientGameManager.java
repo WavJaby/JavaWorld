@@ -7,7 +7,7 @@ import com.javaworld.core.jwentities.Player;
 import com.javaworld.data.*;
 import com.javaworld.util.TCPDataReader;
 import com.javaworld.util.TCPDataWriter;
-import com.wavjaby.serializer.Serializer;
+import com.wavjaby.serializer.Serializable;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -67,7 +67,7 @@ public class ClientGameManager {
     private void receiver() {
         while (true) {
             try {
-                Serializer obj = in.readObject();
+                Serializable obj = in.readObject();
                 // Connection close
                 if (obj == null) break;
                 // Process package
@@ -115,7 +115,7 @@ public class ClientGameManager {
             in = new TCPDataReader(socket.getInputStream());
             out = new TCPDataWriter(socket.getOutputStream());
             logger.info("Connection Successful!");
-            Serializer serverResponse;
+            Serializable serverResponse;
             // Login
             out.write(new PlayerLogin(1, playerName));
             serverResponse = in.readObject();

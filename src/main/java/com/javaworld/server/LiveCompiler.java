@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
 public class LiveCompiler {
     private static final Logger logger = Logger.getLogger(LiveCompiler.class.getSimpleName());
     private static final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-//    private static final Field outField, errField;
+    //    private static final Field outField, errField;
     private static final String isNotInterrupt;
 
     static {
@@ -46,7 +46,7 @@ public class LiveCompiler {
     private final File adapterLib;
 
     public LiveCompiler() {
-        adapterLib = new File("..\\JavaWorldAdapter\\build\\libs\\JavaWorldAdapter-1.0-SNAPSHOT.jar");
+        adapterLib = new File("..\\JavaWorldAdapter\\build\\libs\\JWAdapter-1.0-SNAPSHOT.jar");
     }
 
     public CompiledResult compileCode(String source) {

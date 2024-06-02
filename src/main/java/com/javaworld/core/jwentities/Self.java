@@ -1,11 +1,11 @@
 package com.javaworld.core.jwentities;
 
 import com.almasb.fxgl.core.math.Vec2;
-import com.javaworld.core.Chunk;
-import com.javaworld.core.ServerWorld;
 import com.javaworld.adapter.block.Block;
 import com.javaworld.adapter.block.BlockID;
 import com.javaworld.adapter.entity.Entity;
+import com.javaworld.core.Chunk;
+import com.javaworld.core.ServerWorld;
 import com.javaworld.core.block.BlockData;
 import lombok.Getter;
 
