@@ -11,9 +11,9 @@ repositories {
 }
 
 dependencies {
-    implementation(files("../JavaWorldAdapter/build/libs/JavaWorldAdapter-1.0-SNAPSHOT.jar"))
+    compileOnly(files("../JavaWorldAdapter/build/libs/JWAdapter-1.0-SNAPSHOT.jar"))
 
-    testImplementation(platform("org.junit:junit-bom:5.10.0"))
+    testImplementation(platform("org.junit:junit-bom:5.11.0-M1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
 }
 

@@ -1,8 +1,8 @@
 package com.player;
 
-import com.wavjaby.javaworld.adapter.PlayerApplication;
-import com.wavjaby.javaworld.adapter.Self;
-import com.wavjaby.javaworld.adapter.World;
+import com.javaworld.adapter.PlayerApplication;
+import com.javaworld.adapter.Self;
+import com.javaworld.adapter.World;
 
 import java.util.ArrayList;
 import java.util.HashMap;
