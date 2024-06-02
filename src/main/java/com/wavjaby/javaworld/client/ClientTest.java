@@ -1,0 +1,70 @@
+package com.wavjaby.javaworld.client;
+
+import com.wavjaby.javaworld.core.GameManager;
+import com.wavjaby.javaworld.core.entity.Entity;
+import com.wavjaby.javaworld.data.ServerResponse;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
+
+public class ClientTest implements ClientGameEvent {
+    private static final Logger logger = Logger.getLogger(ClientTest.class.getSimpleName());
+    private final ClientGameManager gm;
+
+    public ClientTest() throws IOException {
+        LogManager.getLogManager().readConfiguration(ClientTest.class.getResourceAsStream("/logging.properties"));
+        // Load game resources
+        long startTime = System.currentTimeMillis();
+        logger.info("Loading resources...");
+        GameManager.loadResources();
+        logger.info("Resources done " + (System.currentTimeMillis() - startTime) + "ms");
+
+        gm = new ClientGameManager("localhost", 5001, this);
+
+        logger.info("Connecting Server...");
+        long start = System.currentTimeMillis();
+        ServerResponse response = gm.connect("Player");
+        if (response == null) {
+            logger.severe("Unknown Error");
+            return;
+        } else if (!response.success) {
+            logger.severe("Server Connect Error: " + response.message);
+            return;
+        }
+        logger.info("Server Connected! " + (System.currentTimeMillis() - start) + "ms");
+
+        response = gm.sendPlayerCode(Files.readString(Path.of("../PlayerExample/src/main/java/com/player/Main.java")));
+        if (response == null) {
+            logger.severe("Unknown Error");
+            return;
+        } else if (!response.success) {
+            logger.severe("Server Connect Error: " + response.message);
+            return;
+        }
+        logger.info("Code Submitted! ");
+
+        gm.join();
+    }
+
+    @Override
+    public void entityCreate(Entity e) {
+        logger.info("Create entity: " + e.getPosition());
+    }
+
+    @Override
+    public void entityUpdate(Entity e) {
+        logger.info("Update entity: " + e.getPosition());
+    }
+
+    @Override
+    public void entityRemove(Entity e) {
+        logger.info("Remove entity: " + e.getPosition());
+    }
+
+    public static void main(String[] args) throws IOException {
+        new ClientTest();
+    }
+}
