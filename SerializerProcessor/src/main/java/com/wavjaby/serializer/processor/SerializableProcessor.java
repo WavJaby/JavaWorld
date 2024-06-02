@@ -1,4 +1,4 @@
-package com.wavjaby.serializer;
+package com.wavjaby.serializer.processor;
 
 import com.google.auto.service.AutoService;
 
@@ -21,10 +21,10 @@ import static javax.tools.Diagnostic.Kind.ERROR;
 
 @AutoService(Processor.class)
 @SupportedSourceVersion(SourceVersion.RELEASE_17)
-@SupportedAnnotationTypes("com.wavjaby.serializer.Serializable")
+@SupportedAnnotationTypes("com.wavjaby.serializer.processor.Serializable")
 public class SerializableProcessor extends AbstractProcessor {
     private static final List<String> serializedClassId = new ArrayList<>();
-    private static final String serializerClassName = "com.wavjaby.serializer.Serializer";
+    private static final String serializerClassName = "com.wavjaby.serializer.Serializable";
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {

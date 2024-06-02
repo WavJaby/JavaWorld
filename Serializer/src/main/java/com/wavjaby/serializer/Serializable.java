@@ -1,12 +1,7 @@
 package com.wavjaby.serializer;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.io.IOException;
 
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.SOURCE)
-public @interface Serializable {
-
+public interface Serializable {
+    byte[] serialize() throws IOException;
 }

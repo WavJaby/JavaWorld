@@ -1,6 +1,5 @@
 plugins {
     id("java")
-    id("java-library")
 }
 
 group = "com.wavjaby"
@@ -11,6 +10,9 @@ repositories {
 }
 
 dependencies {
+    compileOnly("com.google.auto.service:auto-service-annotations:1.1.1")
+    annotationProcessor("com.google.auto.service:auto-service:1.1.1")
+
     testImplementation(platform("org.junit:junit-bom:5.11.0-M1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
 }
