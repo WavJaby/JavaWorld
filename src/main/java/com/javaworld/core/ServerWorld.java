@@ -1,12 +1,13 @@
 package com.javaworld.core;
 
 import com.javaworld.core.entity.Entity;
+import com.javaworld.core.update.EntityUpdate;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.javaworld.core.EntityUpdate.UpdateType.CREATE;
-import static com.javaworld.core.EntityUpdate.UpdateType.REMOVE;
+import static com.javaworld.core.update.UpdateType.CREATE;
+import static com.javaworld.core.update.UpdateType.REMOVE;
 
 public class ServerWorld extends World {
     private final List<EntityUpdate> entityUpdates;

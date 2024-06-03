@@ -48,7 +48,7 @@ public class LiveCompiler {
 
     public LiveCompiler() {
         adapterLib = new File("..\\JavaWorldAdapter\\build\\libs\\JavaWorldSDK-1.0-SNAPSHOT.jar");
-        if(!adapterLib.isFile())
+        if (!adapterLib.isFile())
             logger.severe("JavaWorldSDK not found");
     }
 
@@ -63,7 +63,7 @@ public class LiveCompiler {
 
         int packageNameIndex = source.indexOf("package ");
         int packageNameEndIndex = source.indexOf(';', packageNameIndex + 8);
-        String fullClassName, packageName = "";
+        String fullClassName, packageName;
         if (packageNameIndex != -1 && packageNameEndIndex != -1) {
             packageName = source.substring(packageNameIndex + 8, packageNameEndIndex);
             fullClassName = packageName + "." + className;
@@ -223,7 +223,7 @@ public class LiveCompiler {
             if (source.indexOf("while", index - 4) == index - 4 &&
                     (index - 5 < 0 || isOther(source.charAt(index - 5)))) {
                 // Find start
-                int whileStart = findNext('(', source, index + 1);
+                int whileStart = findNextBracket(source, index + 1);
                 if (whileStart == source.length()) return -1;
                 if (whileStart != -1 && whileStart + 1 < source.length()) {
                     // While start
@@ -247,7 +247,7 @@ public class LiveCompiler {
             if (source.indexOf("for", index - 2) == index - 2 &&
                     (index - 3 < 0 || isOther(source.charAt(index - 3)))) {
                 // Find start
-                int forIndex = findNext('(', source, index + 1);
+                int forIndex = findNextBracket(source, index + 1);
                 if (forIndex == source.length()) return -1;
                 if (forIndex != -1 && forIndex + 1 < source.length()) {
                     // Init
@@ -300,10 +300,10 @@ public class LiveCompiler {
         return index;
     }
 
-    private static int findNext(char bracket, String source, int index) {
+    private static int findNextBracket(String source, int index) {
         while ((index = skipString(source, index)) < source.length()) {
             char c = source.charAt(index);
-            if (c == bracket) return index;
+            if (c == '(') return index;
             else if (!Character.isWhitespace(c)) return -1;
             index++;
         }

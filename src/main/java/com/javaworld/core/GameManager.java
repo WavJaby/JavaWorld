@@ -6,11 +6,15 @@ import com.javaworld.core.block.BlockData;
 import com.javaworld.core.block.BlockState;
 import com.javaworld.core.entity.Entity;
 import com.javaworld.core.entity.EntityData;
-import com.javaworld.core.jwblocks.Grass;
+import com.javaworld.core.jwblocks.GrassBlock;
 import com.javaworld.core.jwblocks.Stone;
 import com.javaworld.core.jwentities.Self;
 import com.javaworld.core.jwentities.Tree;
+import com.javaworld.core.update.BlockUpdate;
+import com.javaworld.core.update.EntityUpdate;
+import com.javaworld.core.update.UpdateType;
 import com.javaworld.data.PlayerConsoleOutput;
+import com.javaworld.data.WorldBlockUpdate;
 import com.javaworld.data.WorldEntityUpdate;
 import com.javaworld.server.ClientHandler;
 import com.javaworld.server.CompiledResult;
@@ -59,31 +63,24 @@ public class GameManager {
     }
 
     private int skipped = 0;
-    private boolean extraTick = false;
     private long usageMillis = 0;
 
     private void gameLoop() {
-        // Skip extra tick
-        if (extraTick) {
-            extraTick = false;
-            return;
-        }
-        long now = System.currentTimeMillis();
-        if (now - lastStateLog <= 1) {
+        long start = System.currentTimeMillis();
+        if (start - lastStateLog <= 1) {
             skipped += 1;
-            lastStateLog = now;
+            lastStateLog = start;
             return;
         } else if (skipped > 0) {
             logger.warning("Skip " + skipped + " ticks");
             skipped = 0;
         }
         tickCount++;
-        if (now - lastStateLog >= 1000) {
-            if (tickCount > TICK) extraTick = true;
+        if (start - lastStateLog >= 1000) {
             logger.info("ticks: " + tickCount + ", usage: " + percentFormat.format(usageMillis / 1000d * 100) + "%");
             usageMillis = 0;
             tickCount = 0;
-            lastStateLog = now;
+            lastStateLog = start;
         }
 
         // Player game update
@@ -115,73 +112,103 @@ public class GameManager {
         }
 
         // Game update
-        Map<Integer, EntityUpdate> movedEntities = new HashMap<>();
+        Map<Integer, EntityUpdate> entitiesUpdate = new HashMap<>();
+        List<BlockUpdate> blocksUpdate = new ArrayList<>();
         try {
             for (ClientHandler client : clients.values()) {
                 if (client.player == null) continue;
                 Self player = client.player;
 
+                // Player move command
                 if (player.getDest() != null && !player.isMoving()) {
                     // Go to new destination
                     player.setCurrentDest(player.getDest());
                     player.setVelocity(player.getDest().sub(player.getPosition()).normalize().mul(WALK_SPEED));
                 }
+                // Player hoeing block command
+                if (player.getHoeingBlock() != null && !player.isHoeingBlock()) {
+                    // Set hoeing time
+                    player.setHoeingBlockTime(serverWorld.getTime() + 1000);
+                }
+
                 // Move player
                 if (player.isMoving()) {
                     float distanceLeft = player.getCurrentDest().sub(player.getPosition()).length();
                     Vec2 vec = player.getVelocity().mul(1d / TICK);
                     if (distanceLeft < vec.length()) {
                         // Moving finish
-                        entitySetPosition(player, player.getCurrentDest(), movedEntities);
+                        entitySetPosition(player, player.getCurrentDest(), entitiesUpdate);
                         player.setVelocityZero();
                         player.setCurrentDest(null);
                     } else
-                        entitySetPosition(player, player.getPosition().add(vec), movedEntities);
+                        entitySetPosition(player, player.getPosition().add(vec), entitiesUpdate);
+                }
+                // Check hoeing state
+                if (player.isHoeingBlock()) {
+                    if (player.getHoeingBlock().getEntityPosition().distance(player.getPosition()) > 1) {
+                        // Player leave current block, cancel
+                        player.stopHoeingBlock();
+                    } else if (serverWorld.getTime() >= player.getHoeingBlockTime()) {
+                        BlockData blockData = BlockData.getBlockData(0, "dirt");
+                        // Check if hoeing done
+                        setBlock((Block) player.getHoeingBlock(), blockData, blocksUpdate);
+                    }
                 }
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error", e);
         }
         // Create entity update output
-        List<EntityUpdate> entityUpdates = new ArrayList<>(serverWorld.getEntityUpdateCount() + movedEntities.size());
+        List<EntityUpdate> entityUpdates = new ArrayList<>(serverWorld.getEntityUpdateCount() + entitiesUpdate.size());
         serverWorld.getEntityUpdates(entityUpdates);
         for (EntityUpdate update : entityUpdates)
-            movedEntities.remove(update.entitySerial);
-        entityUpdates.addAll(movedEntities.values());
-        WorldEntityUpdate entityUpdate = entityUpdates.isEmpty() ? null : new WorldEntityUpdate(entityUpdates);
+            entitiesUpdate.remove(update.entitySerial);
+        entityUpdates.addAll(entitiesUpdate.values());
+        byte[] entityUpdate = entityUpdates.isEmpty() ? null : new WorldEntityUpdate(entityUpdates).serialize();
+        byte[] blockUpdate = blocksUpdate.isEmpty() ? null : new WorldBlockUpdate(blocksUpdate).serialize();
 
         // Send player console output, game update
         for (ClientHandler client : clients.values()) {
-            if (client.compiled == null) continue;
-            final CompiledResult compiled = client.compiled;
-
             try {
-                // Get user output
-                String out = compiled.out.toString(StandardCharsets.UTF_8);
-                compiled.out.reset();
+                // Send player console out
+                if (client.compiled != null) {
+                    final CompiledResult compiled = client.compiled;
+                    // Get user output
+                    String out = compiled.out.toString(StandardCharsets.UTF_8);
+                    compiled.out.reset();
 
-                String err = compiled.err.toString(StandardCharsets.UTF_8);
-                compiled.err.reset();
+                    String err = compiled.err.toString(StandardCharsets.UTF_8);
+                    compiled.err.reset();
 
-                client.out.write(new PlayerConsoleOutput(out.isBlank() ? null : out, err.isBlank() ? null : err));
+                    client.out.write(new PlayerConsoleOutput(out.isBlank() ? null : out, err.isBlank() ? null : err));
+                }
+                // Send entity update
                 if (entityUpdate != null)
                     client.out.write(entityUpdate);
+                // Send block update
+                if (blockUpdate != null)
+                    client.out.write(blockUpdate);
 
                 // Client use illegal class, disconnect it
                 if (client.illegal)
                     client.disconnect();
             } catch (IOException e) {
-                logger.warning(e.getMessage());
+//                logger.warning(e.getMessage());
             }
         }
-        usageMillis += System.currentTimeMillis() - now;
+        usageMillis += System.currentTimeMillis() - start;
+    }
+
+    private void setBlock(Block hoeingBlock, BlockData newBlockData, List<BlockUpdate> blocksUpdate) {
+        serverWorld.setBlock(hoeingBlock.x, hoeingBlock.y, hoeingBlock.z, newBlockData, null);
+        blocksUpdate.add(new BlockUpdate(UpdateType.UPDATE, hoeingBlock, newBlockData));
     }
 
     private void entitySetPosition(Entity entity, Vec2 position, Map<Integer, EntityUpdate> movedEntities) {
         if (entity.getPosition().equals(position))
             return;
         entity.setPosition(position);
-        movedEntities.computeIfAbsent(entity.getSerial(), (k) -> new EntityUpdate(EntityUpdate.UpdateType.UPDATE, entity));
+        movedEntities.computeIfAbsent(entity.getSerial(), (k) -> new EntityUpdate(UpdateType.UPDATE, entity));
     }
 
     private void runPlayerCode(ClientHandler client, CountDownLatch count) {
@@ -216,15 +243,16 @@ public class GameManager {
         Chunk chunk = serverWorld.loadChunk(0, 0);
         Namespace javaWorld = Namespace.getNamespace("javaworld");
         assert javaWorld != null;
-        BlockData grass = BlockData.getBlockData(BlockData.getBlockID(javaWorld, "grass"));
-        BlockData stone = BlockData.getBlockData(BlockData.getBlockID(javaWorld, "stone"));
+        BlockData grassBlock = BlockData.getBlockData(javaWorld, "grass_block");
+        BlockData dirt = BlockData.getBlockData(javaWorld, "dirt");
+        BlockData stone = BlockData.getBlockData(javaWorld, "stone");
 
         for (byte x = 0; x < com.javaworld.adapter.block.Chunk.CHUNK_SIZE; x++) {
             for (byte y = 0; y < com.javaworld.adapter.block.Chunk.CHUNK_SIZE; y++) {
-                chunk.createBlock(null, null, x, y, (byte) 3);
-                chunk.createBlock(grass, new BlockState(), x, y, (byte) 2);
-                chunk.createBlock(grass, new BlockState(), x, y, (byte) 1);
-                chunk.createBlock(stone, new BlockState(), x, y, (byte) 0);
+                chunk.setBlock(null, null, x, y, (byte) 3);
+                chunk.setBlock(grassBlock, new BlockState(), x, y, (byte) 2);
+                chunk.setBlock(dirt, new BlockState(), x, y, (byte) 1);
+                chunk.setBlock(stone, new BlockState(), x, y, (byte) 0);
             }
         }
     }
@@ -234,8 +262,9 @@ public class GameManager {
         // Add default blocks
         Namespace javaWorld = Namespace.addNamespace("javaworld");
         Object[][] blocks = {
-                {"air", Grass.class},
-                {"grass", Grass.class},
+                {"air", null},
+                {"grass_block", GrassBlock.class},
+                {"dirt", GrassBlock.class},
                 {"stone", Stone.class},
         };
         Object[][] entities = {

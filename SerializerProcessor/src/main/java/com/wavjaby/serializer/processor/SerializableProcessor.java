@@ -54,7 +54,7 @@ public class SerializableProcessor extends AbstractProcessor {
         try (Writer out = processingEnv.getFiler().createSourceFile(packageName + "." + className).openWriter()) {
             out.write(codeOut.toString());
         } catch (IOException e) {
-            e.printStackTrace();
+            processingEnv.getMessager().printMessage(ERROR, "Could not write serialized classes: '" + packageName + "." + className + "'");
         }
 
         System.out.println("serializer process done");
@@ -65,7 +65,7 @@ public class SerializableProcessor extends AbstractProcessor {
         String className = element.getSimpleName().toString();
         String packageName = element.getEnclosingElement().toString();
         String serializerName = className + "Serializer";
-        String builderFullName = packageName + "." + serializerName;
+        String serializerFullName = packageName + "." + serializerName;
         String classFullName = packageName + "." + className;
         List<? extends Element> fields = element.getEnclosedElements()
                 .stream().filter(e -> FIELD.equals(e.getKind())).toList();
@@ -200,7 +200,7 @@ public class SerializableProcessor extends AbstractProcessor {
         codeOut.append(format(" private static final int serialId = %d;\n", classId));
 
         // Serialize function
-        codeOut.append(" public byte[] serialize() throws IOException {\n");
+        codeOut.append(" public byte[] serialize() {\n");
         codeOut.append(format("  %s obj = (%s)this;\n", className, className));
         codeOut.append(format("  byte[] data = new byte[%d];\n", staticDataLen));
         encodeCache.append("  ").append(setInt(0, "serialId"));
@@ -224,10 +224,10 @@ public class SerializableProcessor extends AbstractProcessor {
         String str = codeOut.toString();
         serializedClassId.add(classFullName);
 
-        try (Writer out = processingEnv.getFiler().createSourceFile(builderFullName).openWriter()) {
+        try (Writer out = processingEnv.getFiler().createSourceFile(serializerFullName).openWriter()) {
             out.write(str);
         } catch (IOException e) {
-            e.printStackTrace();
+            processingEnv.getMessager().printMessage(ERROR, "Could not write serialized classes: '" + serializerFullName + "'");
         }
     }
 

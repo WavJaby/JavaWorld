@@ -1,9 +1,10 @@
 package com.javaworld.client;
 
 import com.javaworld.adapter.entity.EntityType;
-import com.javaworld.core.EntityUpdate;
 import com.javaworld.core.World;
 import com.javaworld.core.jwentities.Player;
+import com.javaworld.core.update.BlockUpdate;
+import com.javaworld.core.update.EntityUpdate;
 import com.javaworld.data.*;
 import com.javaworld.util.TCPDataReader;
 import com.javaworld.util.TCPDataWriter;
@@ -64,6 +65,20 @@ public class ClientGameManager {
         }
     }
 
+    private void calculateBlockUpdate(WorldBlockUpdate blockUpdate) {
+        // TODO: Fix here
+        for (BlockUpdate update : blockUpdate.toEntityUpdates()) {
+            switch (update.type) {
+                case CREATE -> {
+                }
+                case REMOVE -> {
+                }
+                case UPDATE -> {
+                }
+            }
+        }
+    }
+
     private void receiver() {
         while (true) {
             try {
@@ -79,6 +94,8 @@ public class ClientGameManager {
                         this.codeCompileResult = c;
                         codeCompileResultLock.notifyAll();
                     }
+                } else if (obj instanceof WorldBlockUpdate blockUpdate) {
+                    calculateBlockUpdate(blockUpdate);
                 } else if (obj instanceof WorldEntityUpdate entityUpdate) {
                     calculateEntityUpdate(entityUpdate);
                 } else

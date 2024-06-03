@@ -1,13 +1,12 @@
 package com.javaworld.util;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 
 public class FilteredClassLoader extends URLClassLoader {
     private final String playerClassName;
 
-    public FilteredClassLoader(URL[] urls, ClassLoader parent, String playerClassName) throws MalformedURLException {
+    public FilteredClassLoader(URL[] urls, ClassLoader parent, String playerClassName) {
         super(playerClassName, urls, parent);
         this.playerClassName = playerClassName;
     }
@@ -35,26 +34,25 @@ public class FilteredClassLoader extends URLClassLoader {
         if (name.startsWith("java.lang.")) {
             if (name.startsWith("System", 10))
                 throw new IllegalAccessError("Using '" + name + "' is not allowed, use 'console' instead");
-            else if (name.startsWith("reflect", 10) ||
-                    name.startsWith("Process", 10) ||
-                    name.startsWith("Thread", 10) ||
-                    name.startsWith("Runnable", 10) ||
-                    name.startsWith("Security", 10) ||
-                    name.startsWith("Runtime", 10) ||
-                    name.startsWith("ClassLoader", 10) ||
-                    name.startsWith("*", 10))
-                return false;
-            return true;
+            else return !name.startsWith("reflect", 10) &&
+                    !name.startsWith("instrument", 10) &&
+                    !name.startsWith("management", 10) &&
+
+                    !name.startsWith("ClassLoader", 10) &&
+                    !name.startsWith("Compiler", 10) &&
+                    !name.startsWith("Process", 10) &&
+                    !name.startsWith("Thread", 10) &&
+                    !name.startsWith("Runnable", 10) &&
+                    !name.startsWith("Security", 10) &&
+                    !name.startsWith("Runtime", 10) &&
+                    !name.startsWith("*", 10);
         }
-        if (name.startsWith(playerClassName) ||
+        return name.startsWith(playerClassName) ||
                 name.startsWith("com.javaworld.adapter") ||
                 name.startsWith("com.almasb.fxgl") ||
-                name.startsWith("java.text") ||
-                name.startsWith("java.util") ||
+                name.startsWith("java.text.") ||
+                name.startsWith("java.util.") && name.indexOf('.', 10) == -1 ||
                 name.equals("java.io.PrintStream") ||
-                name.equals("java.io.Serializable")
-        ) return true;
-
-        return false;
+                name.equals("java.io.Serializable");
     }
 }

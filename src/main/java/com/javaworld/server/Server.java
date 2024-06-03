@@ -17,6 +17,7 @@ import java.util.logging.Logger;
 
 public class Server implements ClientEvent {
     private static final Logger logger = Logger.getLogger(Server.class.getSimpleName());
+    public static final int port = 25565;
     public static final LiveCompiler compiler = new LiveCompiler();
     private final ThreadPoolExecutor clientPool = (ThreadPoolExecutor)
             Executors.newFixedThreadPool(100, new CustomThreadFactory("Clients"));
@@ -24,7 +25,6 @@ public class Server implements ClientEvent {
     private final ServerSocket serverSocket;
     private final Thread serverThread;
     private final GameManager gameManager;
-    private static int port = 5001;
 
     public Server() throws IOException {
         serverSocket = new ServerSocket(port);
@@ -66,7 +66,7 @@ public class Server implements ClientEvent {
                 int available = clientPool.getMaximumPoolSize() - clientPool.getActiveCount();
                 logger.info("[" + clientSocketIP + ":" + clientSocketPort + "] Client connected, " + available);
             } catch (IOException e) {
-                logger.warning(e.toString());
+//                logger.warning(e.toString());
             }
         }
     }

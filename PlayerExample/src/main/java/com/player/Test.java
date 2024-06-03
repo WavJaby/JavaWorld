@@ -26,7 +26,7 @@ public class Test extends PlayerApplication {
 //            File file = new File("WantToGetFile");
 //            System.out.println("0w0");
 //            try {
-//                self.getClass().getMethod("setPosition", Vector2D.class).invoke(self, new Vector2D(10, 10));
+//                self.getClass().getMethod("setPosition", Vec2.class).invoke(self, new Vec2(10, 10));
 //            } catch (Exception e) {
 //            }
 //            boolean a = true;

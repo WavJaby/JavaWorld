@@ -5,9 +5,9 @@ import com.javaworld.core.block.Block;
 import com.javaworld.core.block.BlockData;
 import com.javaworld.core.block.BlockState;
 
-public class Grass extends Block {
+public class Dirt extends Block {
 
-    public Grass(BlockData blockData, BlockState blockState, Chunk chunk, byte x, byte y, byte z) {
+    public Dirt(BlockData blockData, BlockState blockState, Chunk chunk, byte x, byte y, byte z) {
         super(blockData, blockState, chunk, x, y, z);
     }
 

@@ -2,7 +2,8 @@ package com.javaworld.data;
 
 import com.almasb.fxgl.core.math.Vec2;
 import com.javaworld.adapter.entity.EntityType;
-import com.javaworld.core.EntityUpdate;
+import com.javaworld.core.update.EntityUpdate;
+import com.javaworld.core.update.UpdateType;
 import com.wavjaby.serializer.processor.Serializable;
 import lombok.AllArgsConstructor;
 
@@ -51,7 +52,7 @@ public class WorldEntityUpdate extends WorldEntityUpdateSerializer {
         for (int i = 0; i < entitySerials.length; i++) {
             EntityType type = EntityType.valueOf(entityType[i]);
             entities.add(new EntityUpdate(
-                    EntityUpdate.UpdateType.valueOf(updateType[i]),
+                    UpdateType.valueOf(updateType[i]),
                     entitySerials[i],
                     new Vec2(entityPositions[i << 1], entityPositions[(i << 1) + 1]),
                     entityDirection[i],

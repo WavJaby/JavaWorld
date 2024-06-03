@@ -1,9 +1,17 @@
 package com.javaworld.core;
 
+import com.javaworld.core.block.Block;
+import com.javaworld.core.block.BlockData;
+import com.javaworld.core.block.BlockState;
 import com.javaworld.core.entity.Entity;
+import com.javaworld.core.update.EntityUpdate;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.javaworld.adapter.block.Chunk.CHUNK_SIZE_MASK;
+import static com.javaworld.adapter.block.Chunk.CHUNK_SIZE_SHIFT;
 
 public class World implements com.javaworld.adapter.World {
     final Map<Integer, Map<Integer, Chunk>> chunks = new HashMap<>();
@@ -30,6 +38,12 @@ public class World implements com.javaworld.adapter.World {
         return chunk;
     }
 
+    public Chunk getChunk(int x, int y) {
+        Map<Integer, Chunk> chunksY = chunks.get(x);
+        if (chunksY == null) return null;
+        return chunksY.get(y);
+    }
+
     public Entity getEntity(int serial) {
         return entities.get(serial);
     }
@@ -50,13 +64,20 @@ public class World implements com.javaworld.adapter.World {
         entity.setDirection(update.entityDirection);
     }
 
-    public Chunk getChunk(int x, int y) {
-        Map<Integer, Chunk> chunksY = chunks.get(x);
-        if (chunksY == null) return null;
-        return chunksY.get(y);
+    public Collection<Entity> getEntities() {
+        return entities.values();
     }
 
-    public Entity[] getEntities() {
-        return entities.values().toArray(new Entity[0]);
+    public void setBlock(int x, int y, int z, BlockData blockData, BlockState blockState) {
+        Chunk chunk = loadChunk(x >> CHUNK_SIZE_SHIFT, y >> CHUNK_SIZE_SHIFT);
+        chunk.setBlock(blockData, blockState, (byte) (x & CHUNK_SIZE_MASK), (byte) (y & CHUNK_SIZE_MASK), (byte) z);
+    }
+
+    public Block getTopBlock(int x, int y) {
+        Map<Integer, Chunk> chunksY = chunks.get(x >> CHUNK_SIZE_SHIFT);
+        if (chunksY == null) return null;
+        Chunk chunk = chunksY.get(y >> CHUNK_SIZE_SHIFT);
+        if (chunk == null) return null;
+        return chunk.getTopBlock((byte) (x & CHUNK_SIZE_MASK), (byte) (y & CHUNK_SIZE_MASK));
     }
 }

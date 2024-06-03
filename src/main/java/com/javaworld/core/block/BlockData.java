@@ -15,8 +15,10 @@ import java.util.logging.Logger;
 public class BlockData extends BlockID {
     private static final Logger logger = Logger.getLogger(BlockData.class.getSimpleName());
 
+    // Block namespaceId->blockId
     private static final List<List<BlockData>> blocks = new ArrayList<>();
-    private static final List<Map<String, BlockID>> blockIDs = new ArrayList<>();
+    // Block namespaceId->blockName
+    private static final List<Map<String, BlockData>> blockNames = new ArrayList<>();
 
     private final Constructor<? extends Block> blockHandler;
 
@@ -46,7 +48,7 @@ public class BlockData extends BlockID {
 
     public static synchronized void createNamespaceBlockList() {
         blocks.add(new ArrayList<>());
-        blockIDs.add(new HashMap<>());
+        blockNames.add(new HashMap<>());
     }
 
     public static synchronized BlockData createBlockData(final Namespace namespace, final String blockName,
@@ -54,16 +56,16 @@ public class BlockData extends BlockID {
         List<BlockData> namespaceBlocks = blocks.get(namespace.id);
         BlockData blockData = new BlockData(namespace, blockName, namespaceBlocks.size(), blockHandler);
         namespaceBlocks.add(blockData);
-        blockIDs.get(namespace.id).put(blockName, blockData);
+        blockNames.get(namespace.id).put(blockName, blockData);
         return blockData;
     }
 
-    public static BlockData getBlockData(BlockID blockID) {
-        return blocks.get(blockID.namespace.id).get(blockID.id);
+    public static BlockData getBlockData(final Namespace namespace, final String blockName) {
+        return blockNames.get(namespace.id).get(blockName);
     }
 
-    public static BlockID getBlockID(final Namespace namespace, final String blockName) {
-        return blockIDs.get(namespace.id).get(blockName);
+    public static BlockData getBlockData(final int namespaceId, final String blockName) {
+        return blockNames.get(namespaceId).get(blockName);
     }
 
     public static Block createBlock(BlockData blockData, BlockState state, Chunk chunk, byte x, byte y, byte z) {
@@ -78,8 +80,8 @@ public class BlockData extends BlockID {
     }
 
     public static BlockID[] getBlockIDs() {
-        List<BlockID> out = new ArrayList<>(blockIDs.size());
-        for (Map<String, BlockID> blockID : blockIDs) {
+        List<BlockID> out = new ArrayList<>(blockNames.size());
+        for (Map<String, BlockData> blockID : blockNames) {
             out.addAll(blockID.values());
         }
         return out.toArray(new BlockID[0]);

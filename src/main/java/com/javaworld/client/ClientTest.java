@@ -12,7 +12,6 @@ import java.util.logging.Logger;
 
 public class ClientTest implements ClientGameEvent {
     private static final Logger logger = Logger.getLogger(ClientTest.class.getSimpleName());
-    private final ClientGameManager gm;
 
     public ClientTest() throws IOException {
         LogManager.getLogManager().readConfiguration(ClientTest.class.getResourceAsStream("/logging.properties"));
@@ -22,7 +21,7 @@ public class ClientTest implements ClientGameEvent {
         GameManager.loadResources();
         logger.info("Resources done " + (System.currentTimeMillis() - startTime) + "ms");
 
-        gm = new ClientGameManager("localhost", 5001, this);
+        ClientGameManager gm = new ClientGameManager("localhost", 25565, this);
 
         logger.info("Connecting Server...");
         long start = System.currentTimeMillis();

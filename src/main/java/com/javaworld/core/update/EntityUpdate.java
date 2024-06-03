@@ -1,4 +1,4 @@
-package com.javaworld.core;
+package com.javaworld.core.update;
 
 import com.almasb.fxgl.core.math.Vec2;
 import com.javaworld.adapter.entity.EntityType;
@@ -8,22 +8,6 @@ import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 public class EntityUpdate {
-    public enum UpdateType {
-        CREATE,
-        REMOVE,
-        UPDATE,
-        ;
-
-        public static UpdateType valueOf(int order) {
-            return switch (order) {
-                case 0 -> UpdateType.CREATE;
-                case 1 -> UpdateType.REMOVE;
-                case 2 -> UpdateType.UPDATE;
-                default -> throw new IllegalStateException("Unexpected value: " + order);
-            };
-        }
-    }
-
     public final UpdateType type;
     public final int entitySerial;
     public final Vec2 entityPosition;
