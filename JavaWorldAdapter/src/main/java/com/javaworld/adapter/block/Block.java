@@ -1,11 +1,9 @@
 package com.javaworld.adapter.block;
 
+import com.almasb.fxgl.core.math.Vec2;
+
 public interface Block {
-    int getBlockX();
-
-    int getBlockY();
-
-    int getBlockZ();
+    Vec2 getEntityPosition();
 
     BlockID getBlockID();
 }
