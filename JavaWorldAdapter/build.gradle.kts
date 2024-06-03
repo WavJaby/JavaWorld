@@ -10,10 +10,10 @@ repositories {
     mavenCentral()
 }
 
-tasks.register<Jar>("adapterJar") {
+tasks.register<Jar>("JavaWorldSDK") {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     includeEmptyDirs = false
-    archiveBaseName = "JWAdapter"
+    archiveBaseName = "JavaWorldSDK"
 
     from(sourceSets.main.get().output)
 

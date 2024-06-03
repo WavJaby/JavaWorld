@@ -4,8 +4,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
 public abstract class PlayerApplication {
-    public final ByteArrayOutputStream out;
-    public final ByteArrayOutputStream err;
+    @SuppressWarnings("FieldCanBeLocal")
+    private final ByteArrayOutputStream out;
+    @SuppressWarnings("FieldCanBeLocal")
+    private final ByteArrayOutputStream err;
     public final PrintStream console;
     public final PrintStream error;
 
