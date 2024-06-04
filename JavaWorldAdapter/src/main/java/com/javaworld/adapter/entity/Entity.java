@@ -11,4 +11,6 @@ public interface Entity {
     World getWorld();
 
     boolean isMoving();
+
+    EntityID getEntityID();
 }

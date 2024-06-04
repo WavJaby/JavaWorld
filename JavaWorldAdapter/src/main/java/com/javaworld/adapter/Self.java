@@ -8,9 +8,14 @@ import com.javaworld.adapter.entity.Player;
 
 public interface Self extends Player {
     /**
-     * Move to new position with speed 1m/s
+     * Move to new position with speed 3m/s
      */
     void moveTo(Vec2 position);
+
+    /**
+     * Get block at current location
+     */
+    Block getBlock();
 
     /**
      * Get all blocks in chunk, get null if block underground
@@ -38,14 +43,39 @@ public interface Self extends Player {
     boolean isHoeingBlock();
 
     /**
+     * Plant a tree at current location, takes 2 s
+     */
+    void plantTree();
+
+    /**
+     * Check planting state
+     */
+    boolean isPlanting();
+
+    /**
+     * Harvest plant at current location, takes 2 s
+     */
+    void harvestPlant();
+
+    /**
+     * Check planting state
+     */
+    boolean isHarvesting();
+
+    /**
+     * Find entity on current block
+     */
+    Entity[] getCurrentBlockEntities();
+
+    /**
+     * Find nearest entity in range of 5m
+     */
+    Entity getNearestEntity();
+
+    /**
      * Find all entities in range of 5m
      */
     Entity[] getEntities();
-
-    /**
-     * Find nearest entities in range of 5m
-     */
-    Entity getNearestEntity();
 
     /**
      * Grab entity, range limit with 1m

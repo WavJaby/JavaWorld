@@ -2,12 +2,12 @@ package com.javaworld.core.entity;
 
 import com.almasb.fxgl.core.math.Vec2;
 import com.javaworld.adapter.World;
-import com.javaworld.adapter.entity.EntityType;
+import com.javaworld.adapter.entity.EntityID;
 import lombok.Getter;
 import lombok.Setter;
 
 public abstract class Entity implements com.javaworld.adapter.entity.Entity {
-    public final EntityType type;
+    public final EntityData entityData;
     protected final Vec2 position;
     @Setter
     protected float direction;
@@ -24,8 +24,8 @@ public abstract class Entity implements com.javaworld.adapter.entity.Entity {
     @Setter
     Vec2 currentDest = null;
 
-    public Entity(EntityType type, Vec2 position, float direction) {
-        this.type = type;
+    public Entity(EntityData entityData, Vec2 position, float direction) {
+        this.entityData = entityData;
         this.position = position;
         this.direction = direction;
     }
@@ -60,5 +60,10 @@ public abstract class Entity implements com.javaworld.adapter.entity.Entity {
     @Override
     public World getWorld() {
         return world;
+    }
+
+    @Override
+    public EntityID getEntityID() {
+        return entityData;
     }
 }

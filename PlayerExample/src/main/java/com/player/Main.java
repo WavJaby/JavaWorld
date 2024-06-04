@@ -11,28 +11,46 @@ public class Main extends PlayerApplication {
     private static final DecimalFormat formatter = new DecimalFormat("0.0");
     private long time;
 
+    int i = 0;
+
+    enum State {
+        MOVE,
+        HOE,
+        PLANT,
+    }
+
+    State state = State.MOVE;
+
     @Override
     public void init(Self self) {
         World world = self.getWorld();
-        time = world.getTime();
-        self.moveTo(new Vec2(5, 0));
+        time = world.getWorldTime();
+        self.moveTo(new Vec2(0.5, 5));
     }
 
     @Override
     public void gameUpdate(Self self) {
         World world = self.getWorld();
-        if (world.getTime() - time > 1000) {
-            time = world.getTime();
-            console.println(vectorFormat(self.getPosition()) + " " + self.isMoving());
+        if (world.getWorldTime() - time >= 20) {
+            time = world.getWorldTime();
+            console.println(vectorFormat(self.getPosition()) + " " + self.isMoving() + " " + self.isHoeingBlock() + " " + self.isPlanting());
+        }
 
-//            StringBuilder builder = new StringBuilder();
-//            Block[] blocks = self.getBlocks(0);
-//            for (int i = 0; i < blocks.length; i++) {
-//                if (i != 0 && i % Chunk.CHUNK_SIZE == 0)
-//                    builder.append('\n');
-//                builder.append(blocks[i].getBlockID().getId());
-//            }
-//            console.println(builder);
+        if (state == State.MOVE) {
+            if (!self.isMoving() && !self.isPlanting()) {
+                self.moveTo(new Vec2(++i + 0.5f, 0));
+                state = State.HOE;
+            }
+        } else if (state == State.HOE) {
+            if (!self.isMoving()) {
+                self.hoeBlock();
+                state = State.PLANT;
+            }
+        } else if (state == State.PLANT) {
+            if (!self.isHoeingBlock()) {
+                self.plantTree();
+                state = State.MOVE;
+            }
         }
     }
 

@@ -13,8 +13,12 @@ public class ServerWorld extends World {
     private final List<EntityUpdate> entityUpdates;
 
     public ServerWorld() {
-        super(System.currentTimeMillis());
+        super(0);
         this.entityUpdates = new ArrayList<>();
+    }
+
+    public void addWorldTime() {
+        worldTime++;
     }
 
     public void createEntity(Entity entity) {

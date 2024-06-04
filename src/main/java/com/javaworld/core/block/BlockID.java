@@ -35,6 +35,11 @@ public class BlockID implements com.javaworld.adapter.block.BlockID {
     }
 
     @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
     public int getId() {
         return id;
     }

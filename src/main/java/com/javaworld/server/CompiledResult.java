@@ -3,7 +3,6 @@ package com.javaworld.server;
 import com.javaworld.adapter.PlayerApplication;
 import com.javaworld.util.FilteredClassLoader;
 
-import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
@@ -23,8 +22,6 @@ public class CompiledResult implements Closeable {
 
     public final FilteredClassLoader classloader;
     public final PlayerApplication playerApplication;
-    public final ByteArrayOutputStream out;
-    public final ByteArrayOutputStream err;
     public final boolean success;
     public final ErrorCode code;
     public final String message;
@@ -36,26 +33,20 @@ public class CompiledResult implements Closeable {
 
         this.classloader = null;
         this.playerApplication = null;
-        this.out = null;
-        this.err = null;
         this.tempDir = null;
     }
 
-    public CompiledResult(String message, FilteredClassLoader classloader, PlayerApplication playerApplication,
-                          ByteArrayOutputStream out, ByteArrayOutputStream err, File tempDir) {
+    public CompiledResult(String message, FilteredClassLoader classloader, PlayerApplication playerApplication, File tempDir) {
         this.success = true;
         this.code = null;
         this.message = message;
         this.classloader = classloader;
         this.playerApplication = playerApplication;
-        this.out = out;
-        this.err = err;
         this.tempDir = tempDir;
     }
 
     @Override
     public void close() throws IOException {
-        if (out != null) out.close();
         if (classloader != null) classloader.close();
         deleteTempFolder(this.tempDir);
     }

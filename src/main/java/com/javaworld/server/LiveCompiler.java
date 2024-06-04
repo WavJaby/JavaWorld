@@ -9,7 +9,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
@@ -24,23 +23,15 @@ import java.util.regex.Pattern;
 public class LiveCompiler {
     private static final Logger logger = Logger.getLogger(LiveCompiler.class.getSimpleName());
     private static final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-    private static final Field outField, errField;
     private static final String isNotInterrupt;
 
     static {
-        Field outField_ = null, errField_ = null;
         Method isNotInterrupt_ = null;
         try {
-            outField_ = PlayerApplication.class.getDeclaredField("out");
-            outField_.setAccessible(true);
-            errField_ = PlayerApplication.class.getDeclaredField("err");
-            errField_.setAccessible(true);
             isNotInterrupt_ = PlayerApplication.class.getDeclaredMethod("isNotInterrupt");
-        } catch (NoSuchMethodException | NoSuchFieldException e) {
-            logger.log(Level.SEVERE, "Could not find PlayerApplication console out", e);
+        } catch (NoSuchMethodException e) {
+            logger.log(Level.SEVERE, "Could not find loop interrupt function console out", e);
         }
-        outField = outField_;
-        errField = errField_;
         isNotInterrupt = isNotInterrupt_ == null ? "true" : isNotInterrupt_.getName() + "()";
     }
 
@@ -128,13 +119,10 @@ public class LiveCompiler {
                     return new CompiledResult(CompiledResult.ErrorCode.BAD_SOURCECODE, "Root class should extend '" + PlayerApplication.class.getName() + "'");
                 }
 
-                ByteArrayOutputStream out = (ByteArrayOutputStream) outField.get(playerApplication);
-                ByteArrayOutputStream err = (ByteArrayOutputStream) errField.get(playerApplication);
-
                 // Return result
                 String message = "Compile success in " + (System.currentTimeMillis() - start) + "ms";
                 logger.info(message);
-                return new CompiledResult(message, classloader, playerApplication, out, err, dir);
+                return new CompiledResult(message, classloader, playerApplication, dir);
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Failed to compile: '" + fullClassName + "'\n", e);
                 deleteTempFolder(dir);

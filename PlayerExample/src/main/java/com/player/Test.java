@@ -15,14 +15,14 @@ public class Test extends PlayerApplication {
     @Override
     public void init(Self self) {
         World world = self.getWorld();
-        time = world.getTime();
+        time = world.getWorldTime();
     }
 
     @Override
     public void gameUpdate(Self self) {
         World world = self.getWorld();
-        if (world.getTime() - time > 1000) {
-            time = world.getTime();
+        if (world.getWorldTime() - time > 1000) {
+            time = world.getWorldTime();
 //            File file = new File("WantToGetFile");
 //            System.out.println("0w0");
 //            try {

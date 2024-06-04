@@ -1,5 +1,6 @@
 package com.javaworld.server;
 
+import com.javaworld.adapter.PlayerApplication;
 import com.javaworld.core.jwentities.Self;
 import com.javaworld.data.PlayerCodeUpload;
 import com.javaworld.data.PlayerLogin;
@@ -8,7 +9,9 @@ import com.javaworld.util.TCPDataReader;
 import com.javaworld.util.TCPDataWriter;
 import com.wavjaby.serializer.Serializable;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -17,6 +20,7 @@ import static com.javaworld.server.Server.compiler;
 
 public class ClientHandler implements Runnable {
     private static final Logger logger = Logger.getLogger(Server.class.getSimpleName());
+    private static final Field playerOutField, playerErrField;
     private final ClientEvent clientEvent;
     private final Socket socket;
     private final TCPDataReader in;
@@ -24,9 +28,25 @@ public class ClientHandler implements Runnable {
 
     private boolean closed = false;
     public String name;
-    public CompiledResult compiled;
     public Self player;
-    public boolean illegal;
+    public boolean playerInit;
+    public CompiledResult compiled;
+    public boolean playerApplicationInit;
+    public ByteArrayOutputStream playerOut, playerErr;
+
+    static {
+        Field outField_ = null, errField_ = null;
+        try {
+            outField_ = PlayerApplication.class.getDeclaredField("out");
+            outField_.setAccessible(true);
+            errField_ = PlayerApplication.class.getDeclaredField("err");
+            errField_.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            logger.log(Level.SEVERE, "Could not find PlayerApplication console out", e);
+        }
+        playerOutField = outField_;
+        playerErrField = errField_;
+    }
 
     public ClientHandler(Socket socket, ClientEvent clientEvent) throws IOException {
         this.clientEvent = clientEvent;
@@ -36,11 +56,28 @@ public class ClientHandler implements Runnable {
     }
 
     private Serializable onReceive(Serializable data) {
+        // Compile player code
         if (data instanceof PlayerCodeUpload playerCode) {
+            closeCompiled();
             CompiledResult result = compiler.compileCode(playerCode.sourceCode);
-            if (result.success) compiled = result;
-            else compiled = null;
             logger.info("[" + name + "] Code compiled");
+            playerApplicationInit = false;
+            if (result.success) {
+                compiled = result;
+                try {
+                    playerOut = (ByteArrayOutputStream) playerOutField.get(result.playerApplication);
+                    playerErr = (ByteArrayOutputStream) playerErrField.get(result.playerApplication);
+                } catch (IllegalAccessException e) {
+                    playerOut = null;
+                    playerErr = null;
+                    return new ServerResponse(false, "Can not get player output stream");
+                }
+            } else {
+                // Compile failed
+                compiled = null;
+                playerOut = null;
+                playerErr = null;
+            }
             return new ServerResponse(result.success, result.message);
         }
 
@@ -85,13 +122,25 @@ public class ClientHandler implements Runnable {
         if (closed) return;
         closed = true;
         try {
+            if (playerOut != null) playerOut.close();
+            if (playerErr != null) playerErr.close();
             in.close();
             out.close();
             socket.close();
-            if (compiled != null) compiled.close();
         } catch (IOException ex) {
             logger.log(Level.SEVERE, ex.getMessage(), ex);
         }
+        closeCompiled();
         clientEvent.clientDisconnect(this);
+    }
+
+    public void closeCompiled() {
+        if (compiled != null) {
+            try {
+                compiled.close();
+            } catch (IOException ignore) {
+            }
+            compiled = null;
+        }
     }
 }

@@ -25,7 +25,6 @@ public class Chunk implements com.javaworld.adapter.block.Chunk {
         }
 
         Block block = BlockData.createBlock(blockData, blockState, this, x, y, z);
-        if (block == null) return;
         blocks[z][(y << CHUNK_SIZE_SHIFT) + x] = block;
     }
 

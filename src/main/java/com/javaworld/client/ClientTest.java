@@ -1,7 +1,10 @@
 package com.javaworld.client;
 
 import com.javaworld.core.GameManager;
+import com.javaworld.core.block.BlockData;
+import com.javaworld.core.block.BlockState;
 import com.javaworld.core.entity.Entity;
+import com.javaworld.core.update.ChunkUpdate;
 import com.javaworld.data.ServerResponse;
 
 import java.io.IOException;
@@ -36,31 +39,51 @@ public class ClientTest implements ClientGameEvent {
         logger.info("Server Connected! " + (System.currentTimeMillis() - start) + "ms");
 
         response = gm.sendPlayerCode(Files.readString(Path.of("../PlayerExample/src/main/java/com/player/Main.java")));
-        if (response == null) {
-            logger.severe("Unknown Error");
-            return;
-        } else if (!response.success) {
-            logger.severe("Server Connect Error: " + response.message);
-            return;
-        }
-        logger.info("Code Submitted! ");
+//        if (response == null) {
+//            logger.severe("Unknown Error");
+//            return;
+//        } else if (!response.success) {
+//            logger.severe("Server Connect Error: " + response.message);
+//            return;
+//        }
+//        logger.info("Code Submitted! ");
 
         gm.join();
     }
 
     @Override
     public void entityCreate(Entity e) {
-//        logger.info("Create entity: " + e.getPosition());
+        logger.info("Create entity: " + e.getPosition());
     }
 
     @Override
     public void entityUpdate(Entity e) {
-//        logger.info("Update entity: " + e.getPosition());
+        logger.info("Update entity: " + e.getPosition());
     }
 
     @Override
     public void entityRemove(Entity e) {
-//        logger.info("Remove entity: " + e.getPosition());
+        logger.info("Remove entity: " + e.getPosition());
+    }
+
+    @Override
+    public void blockCreate(int blockX, int blockY, int blockZ, BlockData blockData, BlockState blockState) {
+
+    }
+
+    @Override
+    public void blockRemove(int blockX, int blockY, int blockZ, BlockData blockData, BlockState blockState) {
+
+    }
+
+    @Override
+    public void blockUpdate(int blockX, int blockY, int blockZ, BlockData blockData, BlockState blockState) {
+        logger.info("Update block: " + blockData);
+    }
+
+    @Override
+    public void chunkInit(ChunkUpdate chunkUpdate) {
+        logger.info("Update chunk: (" + chunkUpdate.chunkX + ", " + chunkUpdate.chunkY + ")");
     }
 
     public static void main(String[] args) throws IOException {

@@ -25,7 +25,7 @@ public class BlockData extends BlockID {
     public BlockData(final Namespace namespace, final String name, final int id, final Class<? extends Block> blockHandler) {
         super(namespace, name, id);
         // Air block
-        if (id == 0) {
+        if (namespace.id == 0 && id == 0 && blockHandler == null) {
             this.blockHandler = null;
             return;
         }
@@ -38,8 +38,7 @@ public class BlockData extends BlockID {
 
         Constructor<? extends Block> blockHandlerConstructor = null;
         try {
-            blockHandlerConstructor = blockHandler.getDeclaredConstructor(
-                    BlockData.class, BlockState.class, Chunk.class, byte.class, byte.class, byte.class);
+            blockHandlerConstructor = blockHandler.getDeclaredConstructor(BlockData.class, BlockState.class, Chunk.class, byte.class, byte.class, byte.class);
         } catch (NoSuchMethodException e) {
             logger.log(Level.SEVERE, "Could not find constructor for block: " + this + " -> " + blockHandler.getName(), e);
         }
@@ -66,6 +65,10 @@ public class BlockData extends BlockID {
 
     public static BlockData getBlockData(final int namespaceId, final String blockName) {
         return blockNames.get(namespaceId).get(blockName);
+    }
+
+    public static BlockData getBlockData(final int namespaceId, final int blockId) {
+        return blocks.get(namespaceId).get(blockId);
     }
 
     public static Block createBlock(BlockData blockData, BlockState state, Chunk chunk, byte x, byte y, byte z) {

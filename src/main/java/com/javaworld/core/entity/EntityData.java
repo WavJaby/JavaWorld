@@ -17,17 +17,17 @@ public class EntityData extends EntityID {
     private static final Logger logger = Logger.getLogger(EntityData.class.getSimpleName());
 
     private static final List<List<EntityData>> entities = new ArrayList<>();
-    private static final List<Map<String, EntityID>> entityIDs = new ArrayList<>();
+    private static final List<Map<String, EntityData>> entityNames = new ArrayList<>();
 
     private final Constructor<? extends Entity> entityHandler;
 
-    public EntityData(final Namespace namespace, final String name, final int id, final Class<? extends Entity> entityHandler) {
-        super(namespace, name, id);
-        // Air entity
-        if (id == 0) {
+    public EntityData(final Namespace namespace, final String name, final int id, EntityType entityType, final Class<? extends Entity> entityHandler) {
+        super(namespace, name, entityType, id);
+        if (entityType == EntityType.PLAYER) {
             this.entityHandler = null;
             return;
         }
+
         // Unknown entity
         if (entityHandler == null) {
             this.entityHandler = null;
@@ -37,8 +37,7 @@ public class EntityData extends EntityID {
 
         Constructor<? extends Entity> entityHandlerConstructor = null;
         try {
-            entityHandlerConstructor = entityHandler.getDeclaredConstructor(
-                    EntityType.class, Vec2.class, float.class);
+            entityHandlerConstructor = entityHandler.getDeclaredConstructor(EntityData.class, Vec2.class, float.class);
         } catch (NoSuchMethodException e) {
             logger.log(Level.SEVERE, "Could not find constructor for entity: " + this + " -> " + entityHandler.getName(), e);
         }
@@ -47,40 +46,38 @@ public class EntityData extends EntityID {
 
     public static synchronized void createNamespaceEntityList() {
         entities.add(new ArrayList<>());
-        entityIDs.add(new HashMap<>());
+        entityNames.add(new HashMap<>());
     }
 
     public static synchronized EntityData createEntityData(final Namespace namespace, final String entityName,
-                                                           final Class<? extends Entity> entityHandler) {
+                                                           EntityType entityType, final Class<? extends Entity> entityHandler) {
         List<EntityData> namespaceEntities = entities.get(namespace.id);
-        EntityData entityData = new EntityData(namespace, entityName, namespaceEntities.size(), entityHandler);
+        EntityData entityData = new EntityData(namespace, entityName, namespaceEntities.size(), entityType, entityHandler);
         namespaceEntities.add(entityData);
-        entityIDs.get(namespace.id).put(entityName, entityData);
+        entityNames.get(namespace.id).put(entityName, entityData);
         return entityData;
     }
 
-    public static EntityData getEntityData(EntityID entityID) {
-        return entities.get(entityID.namespace.id).get(entityID.id);
+    public static EntityData getEntityData(final int namespaceId, final String entityName) {
+        return entityNames.get(namespaceId).get(entityName);
     }
 
-    public static EntityID getEntityID(final Namespace namespace, final String entityName) {
-        return entityIDs.get(namespace.id).get(entityName);
+    public static EntityData getEntityData(int namespaceId, int entityId) {
+        return entities.get(namespaceId).get(entityId);
     }
 
-    public static Entity createEntity(EntityData entityData, EntityType type, Vec2 position, float direction) {
-        if (entityData.entityHandler == null)
-            return null;
+    public static Entity createEntity(EntityData entityData, Vec2 position, float direction) {
         try {
-            return entityData.entityHandler.newInstance(type, position, direction);
+            return entityData.entityHandler.newInstance(entityData, position, direction);
         } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
             logger.log(Level.SEVERE, e.getMessage(), e);
         }
         return null;
     }
 
-    public static EntityID[] getEntityIDs() {
-        List<EntityID> out = new ArrayList<>(entityIDs.size());
-        for (Map<String, EntityID> entityID : entityIDs) {
+    public static EntityID[] getEntities() {
+        List<EntityID> out = new ArrayList<>(entityNames.size());
+        for (Map<String, EntityData> entityID : entityNames) {
             out.addAll(entityID.values());
         }
         return out.toArray(new EntityID[0]);

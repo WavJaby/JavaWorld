@@ -1,16 +1,19 @@
 package com.javaworld.core.entity;
 
+import com.javaworld.adapter.entity.EntityType;
 import com.javaworld.core.Namespace;
 
 public class EntityID implements com.javaworld.adapter.entity.EntityID {
     public final Namespace namespace;
     public final String name;
     public final int id;
+    public final EntityType entityType;
 
-    public EntityID(final Namespace namespace, final String name, final int id) {
+    public EntityID(final Namespace namespace, final String name, EntityType entityType, final int id) {
         this.namespace = namespace;
         this.name = name;
         this.id = id;
+        this.entityType = entityType;
     }
 
     @Override
@@ -32,6 +35,11 @@ public class EntityID implements com.javaworld.adapter.entity.EntityID {
     @Override
     public String getFullName() {
         return namespace.name + ":" + name;
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 
     @Override

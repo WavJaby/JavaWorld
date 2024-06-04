@@ -1,8 +1,9 @@
 package com.javaworld.client;
 
-import com.javaworld.adapter.entity.EntityType;
 import com.javaworld.core.World;
-import com.javaworld.core.jwentities.Player;
+import com.javaworld.core.block.BlockData;
+import com.javaworld.core.block.BlockState;
+import com.javaworld.core.entity.Entity;
 import com.javaworld.core.update.BlockUpdate;
 import com.javaworld.core.update.EntityUpdate;
 import com.javaworld.data.*;
@@ -42,41 +43,49 @@ public class ClientGameManager {
 
     private void calculateEntityUpdate(WorldEntityUpdate entityUpdate) {
         for (EntityUpdate update : entityUpdate.toEntityUpdates()) {
-            if (update.entityType == EntityType.PLAYER) {
-                switch (update.type) {
-                    case CREATE -> {
-                        Player player = new Player(update.playerName, update.entityPosition, update.entityDirection);
-                        world.createEntity(update.entitySerial, player);
-                        event.entityCreate(player);
-                    }
-                    case REMOVE -> {
-                        Player player = (Player) world.getEntity(update.entitySerial);
-                        event.entityRemove(player);
-                        world.removeEntity(player);
-                    }
-                    case UPDATE -> {
-                        Player player = (Player) world.getEntity(update.entitySerial);
-                        world.updateEntity(player, update);
-                        event.entityUpdate(player);
-                    }
+            switch (update.type) {
+                case CREATE -> {
+                    Entity entity = update.toEntity();
+                    world.createEntity(update.entitySerial, entity);
+                    event.entityCreate(entity);
                 }
-            } else
-                logger.warning("Unsupported entity");
+                case REMOVE -> {
+                    Entity entity = world.getEntity(update.entitySerial);
+                    event.entityRemove(entity);
+                    world.removeEntity(entity);
+                }
+                case UPDATE -> {
+                    Entity entity = world.getEntity(update.entitySerial);
+                    world.updateEntity(entity, update);
+                    event.entityUpdate(entity);
+                }
+            }
         }
     }
 
     private void calculateBlockUpdate(WorldBlockUpdate blockUpdate) {
-        // TODO: Fix here
         for (BlockUpdate update : blockUpdate.toEntityUpdates()) {
+            BlockData blockData = BlockData.getBlockData(update.namespaceId, update.blockId);
+            BlockState blockState = null;
             switch (update.type) {
                 case CREATE -> {
+                    world.setBlock(update.blockX, update.blockY, update.blockZ, blockData, blockState);
+                    event.blockCreate(update.blockX, update.blockY, update.blockZ, blockData, blockState);
                 }
                 case REMOVE -> {
+                    world.setBlock(update.blockX, update.blockY, update.blockZ, null, null);
+                    event.blockRemove(update.blockX, update.blockY, update.blockZ, null, null);
                 }
                 case UPDATE -> {
+                    world.setBlock(update.blockX, update.blockY, update.blockZ, blockData, null);
+                    event.blockUpdate(update.blockX, update.blockY, update.blockZ, blockData, blockState);
                 }
             }
         }
+    }
+
+    private void calculateChunkInit(WorldChunkInit worldChunkInit) {
+        event.chunkInit(worldChunkInit.toChunks().get(0));
     }
 
     private void receiver() {
@@ -98,6 +107,8 @@ public class ClientGameManager {
                     calculateBlockUpdate(blockUpdate);
                 } else if (obj instanceof WorldEntityUpdate entityUpdate) {
                     calculateEntityUpdate(entityUpdate);
+                } else if (obj instanceof WorldChunkInit worldChunkInit) {
+                    calculateChunkInit(worldChunkInit);
                 } else
                     logger.log(Level.SEVERE, "Unknown package: " + obj.getClass().getName());
             } catch (IOException e) {

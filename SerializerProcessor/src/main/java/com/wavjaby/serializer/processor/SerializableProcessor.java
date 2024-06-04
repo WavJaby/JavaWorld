@@ -5,6 +5,7 @@ import com.google.auto.service.AutoService;
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
@@ -78,6 +79,8 @@ public class SerializableProcessor extends AbstractProcessor {
                 decodeCache = new StringBuilder(), constructorCache = new StringBuilder();
 
         for (Element field : fields) {
+            if (field.getModifiers().contains(Modifier.STATIC))
+                continue;
             TypeKind type = field.asType().getKind();
             String fieldName = field.getSimpleName().toString();
             // Create constructor arguments

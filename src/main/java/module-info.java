@@ -11,6 +11,7 @@ module com.javaworld {
 
     exports com.javaworld.client;
     exports com.javaworld.server;
+    exports com.javaworld.util;
     exports com.javaworld.core;
     exports com.javaworld.core.entity;
     exports com.javaworld.core.block;
