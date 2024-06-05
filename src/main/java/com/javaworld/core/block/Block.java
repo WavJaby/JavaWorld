@@ -24,8 +24,6 @@ public abstract class Block implements com.javaworld.adapter.block.Block {
 
     public abstract void tickUpdate();
 
-    public abstract void render();
-
     @Override
     public Vec2 getEntityPosition() {
         return new Vec2(x + 0.5f, y + 0.5f);

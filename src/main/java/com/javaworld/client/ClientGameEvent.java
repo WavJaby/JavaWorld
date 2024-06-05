@@ -19,4 +19,6 @@ public interface ClientGameEvent {
     void blockUpdate(int blockX, int blockY, int blockZ, BlockData blockData, BlockState blockState);
 
     void chunkInit(ChunkUpdate chunkUpdate);
+
+    void playerScoreUpdate(String[] playerNames, int[] playerScore);
 }

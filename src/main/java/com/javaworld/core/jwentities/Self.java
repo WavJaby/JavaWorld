@@ -17,7 +17,10 @@ public class Self extends Player implements com.javaworld.adapter.Self {
     @Getter
     Vec2 dest = null;
     @Getter
-    Entity grabbedEntity = null;
+    Entity grabEntityTarget = null;
+    @Getter
+    @Setter
+    boolean grabbingEntity = false;
 
     @Getter
     Block hoeingBlockTarget = null;
@@ -47,7 +50,7 @@ public class Self extends Player implements com.javaworld.adapter.Self {
     }
 
     public boolean noAction() {
-        return hoeingBlockTime == -1 && plantTreeTime == -1;
+        return hoeingBlockTime == -1 && plantTreeTime == -1 && !grabbingEntity;
     }
 
     @Override
@@ -104,7 +107,6 @@ public class Self extends Player implements com.javaworld.adapter.Self {
 
     @Override
     public void harvestPlant() {
-
     }
 
     @Override
@@ -114,14 +116,14 @@ public class Self extends Player implements com.javaworld.adapter.Self {
 
     @Override
     public void grabEntity(Entity entity) {
-        if (grabbedEntity != null || entity == null) return;
+        if (grabEntityTarget != null || entity == null) return;
         if (position.distance(entity.getPosition()) > 1) return;
-        grabbedEntity = entity;
+        grabEntityTarget = entity;
     }
 
     @Override
     public void putEntity() {
-        grabbedEntity = null;
+        grabEntityTarget = null;
     }
 
     @Override

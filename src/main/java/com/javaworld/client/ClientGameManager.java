@@ -109,6 +109,8 @@ public class ClientGameManager {
                     calculateEntityUpdate(entityUpdate);
                 } else if (obj instanceof WorldChunkInit worldChunkInit) {
                     calculateChunkInit(worldChunkInit);
+                } else if (obj instanceof PlayerScoreUpdate playerScoreUpdate) {
+                    event.playerScoreUpdate(playerScoreUpdate.playerNames, playerScoreUpdate.playerScore);
                 } else
                     logger.log(Level.SEVERE, "Unknown package: " + obj.getClass().getName());
             } catch (IOException e) {
@@ -150,11 +152,11 @@ public class ClientGameManager {
             if (serverResponse instanceof ServerResponse response) {
                 reciverThread.start();
                 return response;
-            }
+            } else
+                return new ServerResponse(false, "Unknown response type: " + serverResponse.getClass().getName());
         } catch (IOException e) {
             return new ServerResponse(false, e.getMessage());
         }
-        return null;
     }
 
     public void disconnect() {

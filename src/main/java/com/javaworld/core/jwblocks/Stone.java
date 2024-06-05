@@ -14,9 +14,4 @@ public class Stone extends Block {
     public void tickUpdate() {
 
     }
-
-    @Override
-    public void render() {
-
-    }
 }

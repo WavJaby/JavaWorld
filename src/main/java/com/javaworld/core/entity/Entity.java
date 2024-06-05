@@ -30,6 +30,8 @@ public abstract class Entity implements com.javaworld.adapter.entity.Entity {
         this.direction = direction;
     }
 
+    public abstract void tickUpdate();
+
     public void setVelocity(Vec2 velocity) {
         this.velocity.set(velocity);
     }

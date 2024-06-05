@@ -16,10 +16,7 @@ import com.javaworld.core.jwentities.Tree;
 import com.javaworld.core.update.BlockUpdate;
 import com.javaworld.core.update.EntityUpdate;
 import com.javaworld.core.update.UpdateType;
-import com.javaworld.data.PlayerConsoleOutput;
-import com.javaworld.data.WorldBlockUpdate;
-import com.javaworld.data.WorldChunkInit;
-import com.javaworld.data.WorldEntityUpdate;
+import com.javaworld.data.*;
 import com.javaworld.server.ClientHandler;
 import com.javaworld.util.CustomThreadFactory;
 
@@ -36,7 +33,7 @@ import static com.javaworld.util.ExceptionToString.exceptionToErrorPrintStream;
 public class GameManager {
     private static final Logger logger = Logger.getLogger(GameManager.class.getSimpleName());
     private static final DecimalFormat percentFormat = new DecimalFormat("0.0");
-    private static final int TICK = 20;
+    public static final int TICK = 20;
     private static final int WALK_SPEED = 3;
     private final ScheduledThreadPoolExecutor gameLoop;
     private final Map<String, ClientHandler> clients;
@@ -143,9 +140,17 @@ public class GameManager {
                     if (player.getHoeingBlockTarget() != null && ((Block) player.getHoeingBlockTarget()).blockData == grass_block) {
                         // Player hoeing block command
                         player.setHoeingBlockTime(serverWorld.getWorldTime() + TICK);
-                    } else if (player.getPlantTreeTarget() != null && ((Block) player.getPlantTreeTarget()).blockData == dirt) {
+                    } else if (player.getPlantTreeTarget() != null && ((Block) player.getPlantTreeTarget()).blockData == dirt &&
+                            serverWorld.findEntityAt(EntityType.PLANT, player.getPlantTreeTarget().getEntityPosition()) == null) {
                         // Player plant tree command
                         player.setPlantTreeTime(serverWorld.getWorldTime() + TICK * 2);
+                    } else if (player.getGrabEntityTarget() != null &&
+                            player.getGrabEntityTarget().getPosition().distance(player.getPosition()) < 1) {
+                        // Player grab entity
+                        player.setGrabbingEntity(true);
+                        if (player.getGrabEntityTarget() instanceof Tree tree) {
+                            tree.setOwner(player);
+                        }
                     }
                 }
 
@@ -180,11 +185,19 @@ public class GameManager {
                     } else if (serverWorld.getWorldTime() >= player.getPlantTreeTime()) {
                         // Plant done
                         Vec2 target = player.getPlantTreeTarget().getEntityPosition();
-                        Entity entity = EntityData.createEntity(tree, target, 0);
+                        Tree entity = (Tree) EntityData.createEntity(tree, target, 0);
                         assert entity != null;
+                        entity.setOwner(player);
                         serverWorld.createEntity(entity);
                         player.stopPlanting();
                     }
+                }
+                if (player.isGrabbingEntity()) {
+                    // Player put entity
+                    if (player.getGrabEntityTarget() == null) {
+                        player.setGrabbingEntity(false);
+                    } else
+                        entitySetPosition((Entity) player.getGrabEntityTarget(), player.getPosition(), entitiesUpdate);
                 }
             }
 
@@ -197,6 +210,20 @@ public class GameManager {
                 client.player = new Self(client.name, new Vec2(0.5f, 0.5f));
                 playerJoin(client.player);
             }
+
+            // Update entities
+            List<Entity> entities = new ArrayList<>(serverWorld.entities.values());
+            for (Entity entity : entities)
+                entity.tickUpdate();
+
+            // Calculate player score
+            List<Player> playerScores = new ArrayList<>();
+            for (ClientHandler client : clients.values()) {
+                if (client.player == null) continue;
+                playerScores.add(client.player);
+            }
+            playerScores.sort((a, b) -> b.getScore() - a.getScore());
+            byte[] playerScoreUpdate = playerScores.isEmpty() ? null : new PlayerScoreUpdate(playerScores).serialize();
 
             // Create entity update output
             List<EntityUpdate> entityUpdates = new ArrayList<>(serverWorld.getEntityUpdateCount() + entitiesUpdate.size());
@@ -234,7 +261,9 @@ public class GameManager {
                         // Send block update
                         if (blockUpdate != null)
                             client.out.write(blockUpdate);
+                        if (playerScoreUpdate != null) client.out.write(playerScoreUpdate);
                     }
+
 
                     // Send player console out
                     if (client.playerOut != null && client.playerErr != null) {
@@ -289,6 +318,13 @@ public class GameManager {
     }
 
     public void playerLeave(Self player) {
+        // Remove owner
+        for (Entity entity : ((ServerWorld) player.getWorld()).entities.values()) {
+            if (entity instanceof Tree tree)
+                if (tree.getOwner() == player)
+                    tree.setOwner(null);
+        }
+
         ((ServerWorld) player.getWorld()).removeEntity(player);
     }
 

@@ -10,10 +10,14 @@ public class Player extends Entity implements com.javaworld.adapter.entity.Playe
     @Getter
     private final String name;
     @Getter
-    private Entity grab;
+    int score;
 
     public Player(String name, Vec2 position, float direction) {
         super(entityData, position, direction);
         this.name = name;
+    }
+
+    @Override
+    public void tickUpdate() {
     }
 }

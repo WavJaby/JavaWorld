@@ -11,8 +11,6 @@ public class Main extends PlayerApplication {
     private static final DecimalFormat formatter = new DecimalFormat("0.0");
     private long time;
 
-    int i = 0;
-
     enum State {
         MOVE,
         HOE,
@@ -20,12 +18,13 @@ public class Main extends PlayerApplication {
     }
 
     State state = State.MOVE;
+    boolean moveR = true;
 
     @Override
     public void init(Self self) {
         World world = self.getWorld();
         time = world.getWorldTime();
-        self.moveTo(new Vec2(0.5, 5));
+        self.moveTo(new Vec2(0.5, 2.5));
     }
 
     @Override
@@ -37,16 +36,25 @@ public class Main extends PlayerApplication {
         }
 
         if (state == State.MOVE) {
+            // Move to next position
             if (!self.isMoving() && !self.isPlanting()) {
-                self.moveTo(new Vec2(++i + 0.5f, 0));
+                Vec2 next = self.getPosition().add(moveR ? 1 : -1, 0);
+                if (next.x > 31 || next.x < 1) {
+                    moveR = !moveR;
+                    self.moveTo(self.getPosition().add(0, 1));
+                    return;
+                }
+                self.moveTo(next);
                 state = State.HOE;
             }
         } else if (state == State.HOE) {
+            // Hoeing block
             if (!self.isMoving()) {
                 self.hoeBlock();
                 state = State.PLANT;
             }
         } else if (state == State.PLANT) {
+            // Plant tree
             if (!self.isHoeingBlock()) {
                 self.plantTree();
                 state = State.MOVE;

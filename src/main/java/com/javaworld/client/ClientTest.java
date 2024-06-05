@@ -10,6 +10,7 @@ import com.javaworld.data.ServerResponse;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
@@ -58,7 +59,7 @@ public class ClientTest implements ClientGameEvent {
 
     @Override
     public void entityUpdate(Entity e) {
-        logger.info("Update entity: " + e.getPosition());
+//        logger.info("Update entity: " + e.getPosition());
     }
 
     @Override
@@ -84,6 +85,18 @@ public class ClientTest implements ClientGameEvent {
     @Override
     public void chunkInit(ChunkUpdate chunkUpdate) {
         logger.info("Update chunk: (" + chunkUpdate.chunkX + ", " + chunkUpdate.chunkY + ")");
+    }
+
+    long t = System.currentTimeMillis();
+
+    @Override
+    public void playerScoreUpdate(String[] playerNames, int[] playerScore) {
+        if (System.currentTimeMillis() - t < 1000)
+            return;
+        t = System.currentTimeMillis();
+
+        logger.info(Arrays.toString(playerNames));
+        logger.info(Arrays.toString(playerScore));
     }
 
     public static void main(String[] args) throws IOException {

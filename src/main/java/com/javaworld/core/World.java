@@ -1,5 +1,7 @@
 package com.javaworld.core;
 
+import com.almasb.fxgl.core.math.Vec2;
+import com.javaworld.adapter.entity.EntityType;
 import com.javaworld.core.block.Block;
 import com.javaworld.core.block.BlockData;
 import com.javaworld.core.block.BlockState;
@@ -83,5 +85,18 @@ public class World implements com.javaworld.adapter.World {
         Chunk chunk = chunksY.get(y >> CHUNK_SIZE_SHIFT);
         if (chunk == null) return null;
         return chunk.getTopBlock((byte) (x & CHUNK_SIZE_MASK), (byte) (y & CHUNK_SIZE_MASK));
+    }
+
+    public Entity findEntityAt(EntityType entityType, Vec2 position) {
+        int blockX = (int) position.x, blockY = (int) position.y;
+
+        for (Entity entity : entities.values()) {
+            if (entity.entityData.entityType != entityType) continue;
+            Vec2 pos = entity.getPosition();
+            if (pos.x >= blockX && pos.x < blockX + 1 &&
+                    pos.y >= blockY && pos.y < blockY + 1)
+                return entity;
+        }
+        return null;
     }
 }

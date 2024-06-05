@@ -15,9 +15,4 @@ public class Dirt extends Block {
     public void tickUpdate() {
 
     }
-
-    @Override
-    public void render() {
-
-    }
 }
