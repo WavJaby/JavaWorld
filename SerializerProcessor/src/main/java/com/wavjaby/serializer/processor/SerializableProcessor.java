@@ -88,10 +88,14 @@ public class SerializableProcessor extends AbstractProcessor {
             constructorCache.append('_').append(fieldName);
 
             String typeName = type.name().toLowerCase();
-            String typeNameUp = type.name().charAt(0) + typeName.substring(1);
             switch (type) {
+                case DOUBLE -> {
+                    encodeCache.append("  ").append(setDouble(staticDataLen, fieldName));
+                    decodeCache.append(format("  %s _%s = %s;\n", typeName, fieldName, getDouble(staticDataLen)));
+                    staticDataLen += 8;
+                }
                 case FLOAT -> {
-                    encodeCache.append("  ").append(setFloat(staticDataLen, "obj." + fieldName));
+                    encodeCache.append("  ").append(setFloat(staticDataLen, fieldName));
                     decodeCache.append(format("  %s _%s = %s;\n", typeName, fieldName, getFloat(staticDataLen)));
                     staticDataLen += 4;
                 }
@@ -106,13 +110,18 @@ public class SerializableProcessor extends AbstractProcessor {
                     staticDataLen += 4;
                 }
                 case SHORT -> {
-                    encodeCache.append(format("  set%s(obj.%s,data,%d);\n", typeNameUp, fieldName, staticDataLen));
-                    decodeCache.append(format("  %s _%s = get%s(data,%d);\n", typeName, fieldName, typeNameUp, staticDataLen));
+                    encodeCache.append("  ").append(setShort(staticDataLen, "obj." + fieldName));
+                    decodeCache.append(format("  %s _%s = %s;\n", typeName, fieldName, getShort(staticDataLen)));
                     staticDataLen += 2;
                 }
                 case BYTE -> {
                     encodeCache.append("  ").append(setByte(staticDataLen, "obj." + fieldName));
                     decodeCache.append(format("  %s _%s = %s;\n", typeName, fieldName, getByte(staticDataLen)));
+                    staticDataLen += 1;
+                }
+                case CHAR -> {
+                    encodeCache.append("  ").append(setByte(staticDataLen, "obj." + fieldName));
+                    decodeCache.append(format("  %s _%s = (char)%s;\n", typeName, fieldName, getByte(staticDataLen)));
                     staticDataLen += 1;
                 }
                 case BOOLEAN -> {
@@ -130,11 +139,11 @@ public class SerializableProcessor extends AbstractProcessor {
                             sh += 1;
                         case SHORT:
                             sh += 1;
-                        case BYTE, BOOLEAN:
+                        case BYTE, BOOLEAN, CHAR:
                             String arrTypeName = arrType.name().toLowerCase();
                             String arrTypeNameUp = arrType.name().charAt(0) + arrTypeName.substring(1);
-                            encodeCache.append(format("  int _%sLen = obj.%s==null?-1:obj.%s.length;\n", fieldName, fieldName, fieldName));
-                            encodeCache.append("  ").append(setInt(staticDataLen, "_" + fieldName + "Len"));
+                            encodeCache.append(format("  int __%sLen = obj.%s==null?-1:obj.%s.length;\n", fieldName, fieldName, fieldName));
+                            encodeCache.append("  ").append(setInt(staticDataLen, "__" + fieldName + "Len"));
                             encodeDynamicCache.append(format("  write%sArray(dataOut,obj.%s);\n", arrTypeNameUp, fieldName));
 
                             decodeCache.append(format("  %s[] _%s = read%sArray(data,dataOffset,%s);\n", arrTypeName, fieldName, arrTypeNameUp, getInt(staticDataLen)));
@@ -142,30 +151,33 @@ public class SerializableProcessor extends AbstractProcessor {
                                 decodeCache.append(format("  if(_%s!=null)dataOffset += _%s.length;\n", fieldName, fieldName));
                             else
                                 decodeCache.append(format("  if(_%s!=null)dataOffset += _%s.length<<%d;\n", fieldName, fieldName, sh));
+                            staticDataLen += 4;
                             break;
 
                         case DECLARED:
                             Class<?> c = getClass(((DeclaredType) ((ArrayType) field.asType()).getComponentType()).asElement());
                             if (c == String.class) {
-                                encodeCache.append("  ").append(setInt(staticDataLen, "obj." + fieldName + ".length"));
-                                encodeDynamicCache.append(format("  for(int i=0;i<obj.%s.length;i++){\n", fieldName));
+                                encodeCache.append(format("  int __%sLen = obj.%s==null?-1:obj.%s.length;\n", fieldName, fieldName, fieldName));
+                                encodeCache.append("  ").append(setInt(staticDataLen, "__" + fieldName + "Len"));
+                                encodeDynamicCache.append(format("  for(int i=0;i<__%sLen;i++){\n", fieldName));
                                 encodeDynamicCache.append(format("   byte[] _%s = obj.%s[i]==null?null:obj.%s[i].getBytes(StandardCharsets.UTF_8);\n", fieldName, fieldName, fieldName));
                                 encodeDynamicCache.append(format("   int _%sLen = _%s==null?-1:_%s.length;\n", fieldName, fieldName, fieldName));
                                 encodeDynamicCache.append("   ").append(addDynamicInt("_" + fieldName + "Len"));
                                 encodeDynamicCache.append(format("   if(_%s!=null)dataOut.write(_%s,0,_%s.length);\n  }\n", fieldName, fieldName, fieldName));
 
 
-                                decodeCache.append(format("  String[] _%s = new String[%s];\n", fieldName, getInt(staticDataLen)));
-                                decodeCache.append(format("  for(int i=0;i<_%s.length;i++){\n", fieldName));
+                                decodeCache.append(format("  int __%sLen = %s;\n", fieldName, getInt(staticDataLen)));
+                                decodeCache.append(format("  String[] _%s = __%sLen==-1?null:new String[__%sLen];\n", fieldName, fieldName, fieldName));
+                                decodeCache.append(format("  for(int i=0;i<__%sLen;i++){\n", fieldName));
                                 decodeCache.append(format("   int _%sLen = %s;\n", fieldName, getInt("dataOffset")));
                                 decodeCache.append(format("   _%s[i] = _%sLen==-1?null:new String(data,dataOffset+4,_%sLen,StandardCharsets.UTF_8);\n", fieldName, fieldName, fieldName));
                                 decodeCache.append(format("   dataOffset += 4+(_%sLen==-1?0:_%sLen);\n  }\n", fieldName, fieldName));
+                                staticDataLen += 4;
                                 break;
                             }
                         default:
                             processingEnv.getMessager().printMessage(ERROR, "Array " + field.asType() + " not support", field);
                     }
-                    staticDataLen += 4;
                 }
                 case DECLARED -> {
                     Class<?> c = getClass(field);
@@ -252,17 +264,13 @@ public class SerializableProcessor extends AbstractProcessor {
     }
 
     private String setShort(int off, String valueName) {
-        return "data[" + (off) + "]=(byte)(" + valueName + ">>24);" +
-                "data[" + (off + 1) + "]=(byte)(" + valueName + ">>16);" +
-                "data[" + (off + 2) + "]=(byte)(" + valueName + ">>8);" +
-                "data[" + (off + 3) + "]=(byte)" + valueName + ";\n";
+        return "data[" + (off) + "]=(byte)(" + valueName + ">>8);" +
+                "data[" + (off + 1) + "]=(byte)" + valueName + ";\n";
     }
 
     private String getShort(int off) {
-        return "(data[" + (off) + "]<<24)&0xFF000000|" +
-                "(data[" + (off + 1) + "]<<16)&0xFF0000|" +
-                "(data[" + (off + 2) + "]<<8)&0xFF00|" +
-                "data[" + (off + 3) + "]&0xFF";
+        return "(short)((data[" + (off) + "]<<8)&0xFF00|" +
+                "data[" + (off + 1) + "]&0xFF)";
     }
 
     private String setInt(int off, String valueName) {
@@ -299,24 +307,33 @@ public class SerializableProcessor extends AbstractProcessor {
     }
 
     private String getLong(int off) {
-        return "((data[" + (off + 1) + "]&0xFFL)<<56)|" +
-                "((data[" + (off + 2) + "]&0xFFL)<<48)|" +
-                "((data[" + (off + 3) + "]&0xFFL)<<40)|" +
-                "((data[" + (off + 4) + "]&0xFFL)<<32)|" +
+        return "((data[" + (off) + "]&0xFFL)<<56)|" +
+                "((data[" + (off + 1) + "]&0xFFL)<<48)|" +
+                "((data[" + (off + 2) + "]&0xFFL)<<40)|" +
+                "((data[" + (off + 3) + "]&0xFFL)<<32)|" +
 
-                "((data[" + (off + 5) + "]&0xFF)<<24)|" +
-                "((data[" + (off + 6) + "]&0xFF)<<16)|" +
-                "((data[" + (off + 7) + "]&0xFF)<<8)|" +
-                "data[" + (off + 8) + "]&0xFF";
+                "((data[" + (off + 4) + "]&0xFFL)<<24)|" +
+                "((data[" + (off + 5) + "]&0xFF)<<16)|" +
+                "((data[" + (off + 6) + "]&0xFF)<<8)|" +
+                "data[" + (off + 7) + "]&0xFF";
     }
 
     private String setFloat(int off, String valueName) {
-        return "int _" + valueName + "B = Float.floatToIntBits(" + valueName + ");" +
-                setInt(off, "_" + valueName + "B") + "\n";
+        return "int _" + valueName + "B = Float.floatToIntBits(obj." + valueName + ");" +
+                setInt(off, "_" + valueName + "B");
     }
 
     private String getFloat(int off) {
         return "Float.intBitsToFloat(" + getInt(off) + ")";
+    }
+
+    private String setDouble(int off, String valueName) {
+        return "long _" + valueName + "B = Double.doubleToLongBits(obj." + valueName + ");" +
+                setLong(off, "_" + valueName + "B");
+    }
+
+    private String getDouble(int off) {
+        return "Double.longBitsToDouble(" + getLong(off) + ")";
     }
 
     private String addDynamicInt(String valueName) {
