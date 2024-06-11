@@ -4,6 +4,7 @@ import com.javaworld.client.ClientTest;
 import com.javaworld.core.GameManager;
 import com.javaworld.util.CustomThreadFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -18,7 +19,7 @@ import java.util.logging.Logger;
 public class Server implements ClientEvent {
     private static final Logger logger = Logger.getLogger(Server.class.getSimpleName());
     public static final int port = 25565;
-    public static final LiveCompiler compiler = new LiveCompiler();
+    public static final LiveCompiler compiler = new LiveCompiler(new File("JavaWorldSDK-1.0-SNAPSHOT.jar"));
     private final ThreadPoolExecutor clientPool = (ThreadPoolExecutor)
             Executors.newFixedThreadPool(100, new CustomThreadFactory("Clients"));
     private final Map<String, ClientHandler> clients = new HashMap<>();

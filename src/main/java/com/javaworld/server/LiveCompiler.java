@@ -37,9 +37,9 @@ public class LiveCompiler {
 
     private final File adapterLib;
 
-    public LiveCompiler() {
-        adapterLib = new File("..\\JavaWorldAdapter\\build\\libs\\JavaWorldSDK-1.0-SNAPSHOT.jar");
-        if (!adapterLib.isFile())
+    public LiveCompiler(File adapterLib) {
+        this.adapterLib = adapterLib;
+        if (!this.adapterLib.isFile())
             logger.severe("JavaWorldSDK not found");
     }
 
@@ -156,7 +156,7 @@ public class LiveCompiler {
         }
     }
 
-    public static String addLoopInterrupt(String source) {
+    static String addLoopInterrupt(String source) {
         List<LoopToken> tokens = new ArrayList<>();
         if (findLoop(source, 0, 0, tokens) != -1) {
             int offset = 0;
@@ -192,18 +192,16 @@ public class LiveCompiler {
             } else if (c == '}') {
                 if (bracketStack.pop() != '{') return -1;
             } else if (inFor == 1 || inFor == 2) {
-                if (bracketStack.size() == 1 && c == ';') {
+                if (bracketStack.size() == 1 && (c == ';' || c == ':')) {
                     if (bracketStack.pop() != '(') return -1;
-                    if (bracketStack.isEmpty()) return index;
+                    return index;
                 }
-                // Middle
-                if (inFor == 2) {
-                    if (bracketStack.isEmpty() && c == ';')
-                        bracketStack.push('(');
-                }
+                // For condition begin
+                if (inFor == 2 && bracketStack.isEmpty() && c == ';')
+                    bracketStack.push('(');
             } else if (inFor == 3) {
-                // End
-                if (bracketStack.isEmpty() && c == ';')
+                // For increment begin
+                if (bracketStack.isEmpty() && (c == ';' || c == ':'))
                     bracketStack.push('(');
             }
 
@@ -242,18 +240,20 @@ public class LiveCompiler {
                     forIndex = findLoop(source, forIndex, 1, result);
                     if (forIndex + 1 >= source.length() || forIndex == -1) return -1;
 
-                    // Condition start
-                    LoopToken start = new LoopToken(forIndex + 1, true);
-                    result.add(start);
-                    // Condition
-                    forIndex = findLoop(source, forIndex, 2, result);
-                    if (forIndex == source.length() || forIndex == -1) return -1;
-                    // Condition end
-                    LoopToken end = new LoopToken(forIndex, false);
-                    result.add(end);
-                    if (source.substring(start.index, end.index).isBlank())
-                        start.empty = end.empty = true;
-
+                    // If is normal for loop not foreach
+                    if (source.charAt(forIndex) != ':') {
+                        // Condition start
+                        LoopToken start = new LoopToken(forIndex + 1, true);
+                        result.add(start);
+                        // Condition
+                        forIndex = findLoop(source, forIndex, 2, result);
+                        if (forIndex == source.length() || forIndex == -1) return -1;
+                        // Condition end
+                        LoopToken end = new LoopToken(forIndex, false);
+                        result.add(end);
+                        if (source.substring(start.index, end.index).isBlank())
+                            start.empty = end.empty = true;
+                    }
 
                     // Increment
                     forIndex = findLoop(source, forIndex, 3, result);
@@ -303,7 +303,7 @@ public class LiveCompiler {
         return c < '0' || c > '9' && c < 'A' || c > 'Z' && c < 'a' || c > 'z' && c < 127;
     }
 
-    public static void deleteTempFolder(File dir) {
+    static void deleteTempFolder(File dir) {
         if (!deleteDirectory(dir))
             logger.warning("Failed to delete temporary folder: " + dir);
     }

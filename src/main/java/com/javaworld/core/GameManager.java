@@ -244,6 +244,7 @@ public class GameManager {
                     if (!client.playerInit) {
                         client.playerInit = true;
 
+                        client.out.write(new WorldChunkInit(serverWorld.getChunks()));
                         // Init player entity
                         if (!serverWorld.entities.isEmpty()) {
                             List<EntityUpdate> initEntityUpdates = new ArrayList<>(serverWorld.entities.size());
@@ -253,7 +254,6 @@ public class GameManager {
                             }
                             client.out.write(new WorldEntityUpdate(initEntityUpdates));
                         }
-                        client.out.write(new WorldChunkInit(serverWorld.getChunks()));
                     } else {
                         // Send entity update
                         if (entityUpdate != null)
@@ -300,6 +300,7 @@ public class GameManager {
         try {
             if (!client.playerApplicationInit) {
                 client.playerApplicationInit = true;
+                client.player.reset();
                 playerApplication.init(client.player);
             } else playerApplication.gameUpdate(client.player);
         } catch (IllegalAccessError e) {

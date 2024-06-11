@@ -5,6 +5,8 @@ import com.javaworld.adapter.PlayerApplication;
 import com.javaworld.adapter.Self;
 import com.javaworld.adapter.entity.Entity;
 
+import java.util.Arrays;
+
 public class Thief extends PlayerApplication {
     enum State {
         MOVE_R,
@@ -38,25 +40,20 @@ public class Thief extends PlayerApplication {
             if (self.isMoving()) return;
             self.grabEntity(tree);
             // Move down
-            self.moveTo(self.getPosition().add(0, 6));
+            self.moveTo(self.getPosition().add(0, 4));
             state = State.PLANT;
         } else if (state == State.PLANT) {
             if (self.isMoving()) return;
             // Replant tree
             self.putEntity();
-            self.moveTo(self.getPosition().add(0, -6));
+            self.moveTo(self.getPosition().add(0, -4));
             state = State.MOVE_R;
             state = getMoveDir(self);
         }
     }
 
     private Entity findTree(Self self) {
-        Entity[] entities = self.getEntities();
-        for (int i = 0; i < entities.length; i++) {
-            if ("tree".equals(entities[i].getEntityID().getName()))
-                return entities[i];
-        }
-        return null;
+        return Arrays.stream(self.getEntities()).filter(e -> "tree".equals(e.getEntityID().getName())).findFirst().orElse(null);
     }
 
     private State getMoveDir(Self self) {

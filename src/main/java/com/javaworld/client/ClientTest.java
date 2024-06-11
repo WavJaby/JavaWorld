@@ -99,6 +99,16 @@ public class ClientTest implements ClientGameEvent {
         logger.info(Arrays.toString(playerScore));
     }
 
+    @Override
+    public void playerLog(String log) {
+
+    }
+
+    @Override
+    public void playerError(String log) {
+
+    }
+
     public static void main(String[] args) throws IOException {
         new ClientTest();
     }

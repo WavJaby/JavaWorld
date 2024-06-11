@@ -51,7 +51,10 @@ public class FilteredClassLoader extends URLClassLoader {
                 name.startsWith("com.javaworld.adapter") ||
                 name.startsWith("com.almasb.fxgl") ||
                 name.startsWith("java.text.") ||
-                name.startsWith("java.util.") && name.indexOf('.', 10) == -1 ||
+                name.startsWith("java.util.") && (name.indexOf('.', 10) == -1 ||
+                        name.startsWith("function", 10) ||
+                        name.startsWith("stream", 10)
+                ) ||
                 name.equals("java.io.PrintStream") ||
                 name.equals("java.io.Serializable");
     }

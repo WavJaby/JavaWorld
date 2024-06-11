@@ -21,4 +21,8 @@ public interface ClientGameEvent {
     void chunkInit(ChunkUpdate chunkUpdate);
 
     void playerScoreUpdate(String[] playerNames, int[] playerScore);
+
+    void playerLog(String log);
+
+    void playerError(String log);
 }

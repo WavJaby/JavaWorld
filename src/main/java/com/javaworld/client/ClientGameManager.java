@@ -96,8 +96,8 @@ public class ClientGameManager {
                 if (obj == null) break;
                 // Process package
                 if (obj instanceof PlayerConsoleOutput playerConsole) {
-                    if (playerConsole.log != null) logger.info(playerConsole.log.trim());
-                    if (playerConsole.error != null) logger.info(playerConsole.error.trim());
+                    if (playerConsole.log != null) event.playerLog(playerConsole.log);
+                    if (playerConsole.error != null) event.playerError(playerConsole.error);
                 } else if (obj instanceof ServerResponse c) {
                     synchronized (codeCompileResultLock) {
                         this.codeCompileResult = c;
@@ -113,8 +113,7 @@ public class ClientGameManager {
                     event.playerScoreUpdate(playerScoreUpdate.playerNames, playerScoreUpdate.playerScore);
                 } else
                     logger.log(Level.SEVERE, "Unknown package: " + obj.getClass().getName());
-            } catch (IOException e) {
-                logger.log(Level.SEVERE, "Error", e);
+            } catch (IOException ignore) {
                 break;
             }
         }

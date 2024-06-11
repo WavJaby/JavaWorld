@@ -10,6 +10,37 @@ repositories {
     mavenCentral()
 }
 
+tasks.register<Jar>("JavaWorldServer") {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    includeEmptyDirs = false
+    archiveBaseName = "JavaWorldServer"
+
+    manifest.attributes(
+        "Main-Class" to "com.javaworld.server.Server",
+    )
+
+    from(sourceSets.main.get().output)
+
+    configurations["runtimeClasspath"].forEach { file: File ->
+        println(file.path)
+        if (file.nameWithoutExtension.startsWith("JavaWorldAdapter") ||
+            file.nameWithoutExtension.startsWith("Serializer")
+        )
+            from(zipTree(file.absoluteFile))
+        if (file.nameWithoutExtension.startsWith("fxgl-core") ||
+            file.nameWithoutExtension.startsWith("javafx-graphics")
+        ) {
+            from(zipTree(file.absoluteFile).matching {
+                include("**/fxgl/core/math/**")
+                include("**/fxgl/core/pool/**")
+                include("**/fxgl/animation/**")
+                include("**/javafx/geom/**")
+                include("**/javafx/geometry/**")
+            })
+        }
+    }
+}
+
 javafx {
     version = "17.0.11"
     modules("javafx.graphics", "javafx.media")

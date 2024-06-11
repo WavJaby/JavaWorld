@@ -39,6 +39,16 @@ public class Self extends Player implements com.javaworld.adapter.Self {
         super(name, pos, 0);
     }
 
+    public void stopMoving() {
+        setVelocityZero();
+        dest = null;
+    }
+
+    public void stopGrabbing() {
+        setVelocityZero();
+        dest = null;
+    }
+
     public void stopHoeingBlock() {
         hoeingBlockTime = -1;
         hoeingBlockTarget = null;
@@ -134,6 +144,7 @@ public class Self extends Player implements com.javaworld.adapter.Self {
             if (distance > 5) continue;
             entities.add(entity);
         }
+        entities.sort((a, b) -> Double.compare(a.getPosition().distance(position), b.getPosition().distance(position)));
         return entities.toArray(new Entity[0]);
     }
 
@@ -163,5 +174,12 @@ public class Self extends Player implements com.javaworld.adapter.Self {
                 entities.add(entity);
         }
         return entities.toArray(new Entity[0]);
+    }
+
+    public void reset() {
+        stopMoving();
+        stopGrabbing();
+        stopPlanting();
+        stopHoeingBlock();
     }
 }

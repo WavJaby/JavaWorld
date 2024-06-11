@@ -26,8 +26,8 @@ public class Tree extends Entity {
         if (owner == null) {
             // Tree die if no owner
             Random r = new Random();
-            if(world.getWorldTime() - nextAddTime > (long) TICK * r.nextInt(10, 20)) {
-                ((World)world).removeEntity(this);
+            if (world.getWorldTime() - nextAddTime > (long) TICK * r.nextInt(10, 20)) {
+                ((World) world).removeEntity(this);
             }
             return;
         }

@@ -28,8 +28,8 @@ public class LiveCompilerTest {
 
     @Test
     public void addLoopInterrupt3() {
-        String source = "for(int a=1;a!=1;new Object(){int a=0;}.a++)a+=1;for(;;)a+=1;";
-        String answer = "for(int a=1;isNotInterrupt()&&(a!=1);new Object(){int a=0;}.a++)a+=1;for(;isNotInterrupt();)a+=1;";
+        String source = "for(int a=1; a!=1 ;new Object(){int a=0;}.a++)a+=1;for(;;)a+=1;";
+        String answer = "for(int a=1;isNotInterrupt()&&( a!=1 );new Object(){int a=0;}.a++)a+=1;for(;isNotInterrupt();)a+=1;";
 
         System.out.println(source);
         String result = LiveCompiler.addLoopInterrupt(source);
@@ -41,6 +41,17 @@ public class LiveCompilerTest {
     public void addLoopInterrupt4() {
         String source = "while(new Object(){public String toString(){int a=1;while(a==1){return\"\";}return\"T\";}}.toString().equals(\"T\")){}int a=1;do{}while(a!=1);";
         String answer = "while(isNotInterrupt()&&(new Object(){public String toString(){int a=1;while(isNotInterrupt()&&(a==1)){return\"\";}return\"T\";}}.toString().equals(\"T\"))){}int a=1;do{}while(isNotInterrupt()&&(a!=1));";
+
+        System.out.println(source);
+        String result = LiveCompiler.addLoopInterrupt(source);
+        System.out.println(result);
+        assertEquals(result, answer);
+    }
+
+    @Test
+    public void addLoopInterrupt5() {
+        String source = "for (int i : integers) {System.out.println(i);}";
+        String answer = "for (int i : integers) {System.out.println(i);}";
 
         System.out.println(source);
         String result = LiveCompiler.addLoopInterrupt(source);
