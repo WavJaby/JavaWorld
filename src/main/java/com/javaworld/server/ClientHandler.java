@@ -2,9 +2,9 @@ package com.javaworld.server;
 
 import com.javaworld.adapter.PlayerApplication;
 import com.javaworld.core.jwentities.Self;
-import com.javaworld.data.PlayerCodeUpload;
-import com.javaworld.data.PlayerLogin;
-import com.javaworld.data.ServerResponse;
+import com.javaworld.data.PlayerCodeData;
+import com.javaworld.data.PlayerLoginData;
+import com.javaworld.data.ServerResponseData;
 import com.javaworld.util.TCPDataReader;
 import com.javaworld.util.TCPDataWriter;
 import com.wavjaby.serializer.Serializable;
@@ -57,12 +57,12 @@ public class ClientHandler implements Runnable {
 
     private Serializable onReceive(Serializable data) {
         // Compile player code
-        if (data instanceof PlayerCodeUpload playerCode) {
+        if (data instanceof PlayerCodeData playerCode) {
             closeCompiled();
             playerApplicationInit = false;
             // Player stop code
             if (playerCode.sourceCode == null)
-                return new ServerResponse(true, null);
+                return new ServerResponseData(true, null);
             // Compile new code
             CompiledResult result = compiler.compileCode(playerCode.sourceCode);
             logger.info("[" + name + "] Code compiled");
@@ -74,7 +74,7 @@ public class ClientHandler implements Runnable {
                 } catch (IllegalAccessException e) {
                     playerOut = null;
                     playerErr = null;
-                    return new ServerResponse(false, "Can not get player output stream");
+                    return new ServerResponseData(false, "Can not get player output stream");
                 }
             } else {
                 // Compile failed
@@ -82,29 +82,29 @@ public class ClientHandler implements Runnable {
                 playerOut = null;
                 playerErr = null;
             }
-            return new ServerResponse(result.success, result.message);
+            return new ServerResponseData(result.success, result.message);
         }
 
-        return new ServerResponse(false, "Unsupported package: " + data.getClass().getName());
+        return new ServerResponseData(false, "Unsupported package: " + data.getClass().getName());
     }
 
     @Override
     public void run() {
         try {
             Serializable login = in.readObject();
-            if (login instanceof PlayerLogin playerLogin) {
-                name = playerLogin.name;
+            if (login instanceof PlayerLoginData playerLoginData) {
+                name = playerLoginData.name;
                 if (name == null || name.isBlank())
-                    out.write(new ServerResponse(false, "Login failed, Illegal player name: '" + name + "'"));
+                    out.write(new ServerResponseData(false, "Login failed, Illegal player name: '" + name + "'"));
                 else if (!clientEvent.clientConnect(this))
-                    out.write(new ServerResponse(false, "Login failed, Player name: '" + name + "' already exists"));
+                    out.write(new ServerResponseData(false, "Login failed, Player name: '" + name + "' already exists"));
                 else {
                     // Login success
-                    out.write(new ServerResponse(true, null));
+                    out.write(new ServerResponseData(true, null));
                     receiverLoop();
                 }
             } else
-                out.write(new ServerResponse(false, "Login failed, wrong package type '" + login.getClass().getName() + "'"));
+                out.write(new ServerResponseData(false, "Login failed, wrong package type '" + login.getClass().getName() + "'"));
         } catch (IOException e) {
 //            logger.log(Level.SEVERE, "Error", e);
         } finally {

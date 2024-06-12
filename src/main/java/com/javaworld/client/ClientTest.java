@@ -5,7 +5,7 @@ import com.javaworld.core.block.BlockData;
 import com.javaworld.core.block.BlockState;
 import com.javaworld.core.entity.Entity;
 import com.javaworld.core.update.ChunkUpdate;
-import com.javaworld.data.ServerResponse;
+import com.javaworld.data.ServerResponseData;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -29,7 +29,7 @@ public class ClientTest implements ClientGameEvent {
 
         logger.info("Connecting Server...");
         long start = System.currentTimeMillis();
-        ServerResponse response = gm.connect("Player");
+        ServerResponseData response = gm.connect("Player");
         if (response == null) {
             logger.severe("Unknown Error");
             return;

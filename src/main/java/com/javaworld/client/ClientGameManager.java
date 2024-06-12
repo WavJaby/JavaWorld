@@ -31,7 +31,7 @@ public class ClientGameManager {
     private TCPDataWriter out;
 
     private final Object codeCompileResultLock = new Object();
-    private volatile ServerResponse codeCompileResult;
+    private volatile ServerResponseData codeCompileResult;
 
     public ClientGameManager(String serverIp, int port, ClientGameEvent event) {
         this.host = serverIp;
@@ -41,7 +41,7 @@ public class ClientGameManager {
         world = new World(System.currentTimeMillis());
     }
 
-    private void calculateEntityUpdate(WorldEntityUpdate entityUpdate) {
+    private void calculateEntityUpdate(WorldEntityUpdateData entityUpdate) {
         for (EntityUpdate update : entityUpdate.toEntityUpdates()) {
             switch (update.type) {
                 case CREATE -> {
@@ -63,8 +63,8 @@ public class ClientGameManager {
         }
     }
 
-    private void calculateBlockUpdate(WorldBlockUpdate blockUpdate) {
-        for (BlockUpdate update : blockUpdate.toEntityUpdates()) {
+    private void calculateBlockUpdate(WorldBlockUpdateData blockUpdate) {
+        for (BlockUpdate update : blockUpdate.toBlockUpdates()) {
             BlockData blockData = BlockData.getBlockData(update.namespaceId, update.blockId);
             BlockState blockState = null;
             switch (update.type) {
@@ -84,8 +84,8 @@ public class ClientGameManager {
         }
     }
 
-    private void calculateChunkInit(WorldChunkInit worldChunkInit) {
-        event.chunkInit(worldChunkInit.toChunks().get(0));
+    private void calculateChunkInit(WorldChunkInitData worldChunkInitData) {
+        event.chunkInit(worldChunkInitData.toChunkUpdates().get(0));
     }
 
     private void receiver() {
@@ -95,22 +95,22 @@ public class ClientGameManager {
                 // Connection close
                 if (obj == null) break;
                 // Process package
-                if (obj instanceof PlayerConsoleOutput playerConsole) {
+                if (obj instanceof PlayerConsoleData playerConsole) {
                     if (playerConsole.log != null) event.playerLog(playerConsole.log);
                     if (playerConsole.error != null) event.playerError(playerConsole.error);
-                } else if (obj instanceof ServerResponse c) {
+                } else if (obj instanceof ServerResponseData c) {
                     synchronized (codeCompileResultLock) {
                         this.codeCompileResult = c;
                         codeCompileResultLock.notifyAll();
                     }
-                } else if (obj instanceof WorldBlockUpdate blockUpdate) {
+                } else if (obj instanceof WorldBlockUpdateData blockUpdate) {
                     calculateBlockUpdate(blockUpdate);
-                } else if (obj instanceof WorldEntityUpdate entityUpdate) {
+                } else if (obj instanceof WorldEntityUpdateData entityUpdate) {
                     calculateEntityUpdate(entityUpdate);
-                } else if (obj instanceof WorldChunkInit worldChunkInit) {
-                    calculateChunkInit(worldChunkInit);
-                } else if (obj instanceof PlayerScoreUpdate playerScoreUpdate) {
-                    event.playerScoreUpdate(playerScoreUpdate.playerNames, playerScoreUpdate.playerScore);
+                } else if (obj instanceof WorldChunkInitData worldChunkInitData) {
+                    calculateChunkInit(worldChunkInitData);
+                } else if (obj instanceof PlayerScoreUpdateData playerScoreUpdateData) {
+                    event.playerScoreUpdate(playerScoreUpdateData.playerNames, playerScoreUpdateData.playerScore);
                 } else
                     logger.log(Level.SEVERE, "Unknown package: " + obj.getClass().getName());
             } catch (IOException ignore) {
@@ -120,12 +120,12 @@ public class ClientGameManager {
         disconnect();
     }
 
-    public ServerResponse sendPlayerCode(String source) {
-        PlayerCodeUpload codeUpload = new PlayerCodeUpload(source);
+    public ServerResponseData sendPlayerCode(String source) {
+        PlayerCodeData codeUpload = new PlayerCodeData(source);
         try {
             out.write(codeUpload);
         } catch (IOException e) {
-            return new ServerResponse(false, e.getMessage());
+            return new ServerResponseData(false, e.getMessage());
         }
         synchronized (codeCompileResultLock) {
             try {
@@ -137,7 +137,7 @@ public class ClientGameManager {
         return codeCompileResult;
     }
 
-    public ServerResponse connect(String playerName) {
+    public ServerResponseData connect(String playerName) {
         socket = new Socket();
         try {
             socket.connect(new InetSocketAddress(host, port), 1000);
@@ -146,15 +146,15 @@ public class ClientGameManager {
             logger.info("Connection Successful!");
             Serializable serverResponse;
             // Login
-            out.write(new PlayerLogin(1, playerName));
+            out.write(new PlayerLoginData(1, playerName));
             serverResponse = in.readObject();
-            if (serverResponse instanceof ServerResponse response) {
+            if (serverResponse instanceof ServerResponseData response) {
                 reciverThread.start();
                 return response;
             } else
-                return new ServerResponse(false, "Unknown response type: " + serverResponse.getClass().getName());
+                return new ServerResponseData(false, "Unknown response type: " + serverResponse.getClass().getName());
         } catch (IOException e) {
-            return new ServerResponse(false, e.getMessage());
+            return new ServerResponseData(false, e.getMessage());
         }
     }
 

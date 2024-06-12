@@ -15,11 +15,11 @@ import static com.javaworld.adapter.block.Chunk.CHUNK_SIZE;
 
 @Serializable
 @AllArgsConstructor
-public class WorldChunkInit extends WorldChunkInitSerializer {
+public class WorldChunkInitData extends WorldChunkInitSerializer {
     public static final int chunkDataLength = 2 + Chunk.CHUNK_SIZE * Chunk.CHUNK_SIZE * Chunk.CHUNK_HEIGHT * 2;
     public final int[] chunkData;
 
-    public WorldChunkInit(List<Chunk> chunks) {
+    public WorldChunkInitData(List<Chunk> chunks) {
         chunkData = new int[chunkDataLength * chunks.size()];
 
         int dataOffset = 0;
@@ -45,7 +45,7 @@ public class WorldChunkInit extends WorldChunkInitSerializer {
         }
     }
 
-    public List<ChunkUpdate> toChunks() {
+    public List<ChunkUpdate> toChunkUpdates() {
         int count = chunkData.length / chunkDataLength;
         List<ChunkUpdate> chunkUpdates = new ArrayList<>();
         int dataOffset = 0;

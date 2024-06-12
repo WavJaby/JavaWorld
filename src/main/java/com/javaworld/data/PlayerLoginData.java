@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 
 @Serializable
 @AllArgsConstructor
-public class PlayerLogin extends PlayerLoginSerializer {
+public class PlayerLoginData extends PlayerLoginSerializer {
     final public int version;
     final public String name;
 }

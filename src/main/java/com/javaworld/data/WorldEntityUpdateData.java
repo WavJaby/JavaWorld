@@ -13,7 +13,7 @@ import java.util.List;
 
 @Serializable
 @AllArgsConstructor
-public class WorldEntityUpdate extends WorldEntityUpdateSerializer {
+public class WorldEntityUpdateData extends WorldEntityUpdateSerializer {
     public final byte[] updateType;
     public final int[] entitySerials;
     // (x,y,dir)[]
@@ -21,7 +21,7 @@ public class WorldEntityUpdate extends WorldEntityUpdateSerializer {
     public final int[] entityId;
     public final String[] playerName;
 
-    public WorldEntityUpdate(List<EntityUpdate> entities) {
+    public WorldEntityUpdateData(List<EntityUpdate> entities) {
         updateType = new byte[entities.size()];
         entitySerials = new int[entities.size()];
         entityPositions = new float[entities.size() * 3];

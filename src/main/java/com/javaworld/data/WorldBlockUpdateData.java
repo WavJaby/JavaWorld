@@ -10,11 +10,11 @@ import java.util.List;
 
 @Serializable
 @AllArgsConstructor
-public class WorldBlockUpdate extends WorldBlockUpdateSerializer {
+public class WorldBlockUpdateData extends WorldBlockUpdateSerializer {
     public final byte[] updateType;
     public final int[] blockData;
 
-    public WorldBlockUpdate(List<BlockUpdate> blocks) {
+    public WorldBlockUpdateData(List<BlockUpdate> blocks) {
         blockData = new int[blocks.size() * 5];
         updateType = new byte[blocks.size()];
         for (int i = 0; i < blocks.size(); i++) {
@@ -28,7 +28,7 @@ public class WorldBlockUpdate extends WorldBlockUpdateSerializer {
         }
     }
 
-    public List<BlockUpdate> toEntityUpdates() {
+    public List<BlockUpdate> toBlockUpdates() {
         List<BlockUpdate> blocks = new ArrayList<>();
         for (int i = 0; i < updateType.length; i++) {
             blocks.add(new BlockUpdate(

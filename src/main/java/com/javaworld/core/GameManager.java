@@ -223,7 +223,7 @@ public class GameManager {
                 playerScores.add(client.player);
             }
             playerScores.sort((a, b) -> b.getScore() - a.getScore());
-            byte[] playerScoreUpdate = playerScores.isEmpty() ? null : new PlayerScoreUpdate(playerScores).serialize();
+            byte[] playerScoreUpdate = playerScores.isEmpty() ? null : new PlayerScoreUpdateData(playerScores).serialize();
 
             // Create entity update output
             List<EntityUpdate> entityUpdates = new ArrayList<>(serverWorld.getEntityUpdateCount() + entitiesUpdate.size());
@@ -232,8 +232,8 @@ public class GameManager {
             // Get entity removed in this tick
             for (EntityUpdate update : entityUpdates)
                 if (update.type == UpdateType.REMOVE) entityRemoved.add(update.entitySerial);
-            entityUpdate = entityUpdates.isEmpty() ? null : new WorldEntityUpdate(entityUpdates).serialize();
-            blockUpdate = blocksUpdate.isEmpty() ? null : new WorldBlockUpdate(blocksUpdate).serialize();
+            entityUpdate = entityUpdates.isEmpty() ? null : new WorldEntityUpdateData(entityUpdates).serialize();
+            blockUpdate = blocksUpdate.isEmpty() ? null : new WorldBlockUpdateData(blocksUpdate).serialize();
 
             serverWorld.addWorldTime();
 
@@ -244,7 +244,7 @@ public class GameManager {
                     if (!client.playerInit) {
                         client.playerInit = true;
 
-                        client.out.write(new WorldChunkInit(serverWorld.getChunks()));
+                        client.out.write(new WorldChunkInitData(serverWorld.getChunks()));
                         // Init player entity
                         if (!serverWorld.entities.isEmpty()) {
                             List<EntityUpdate> initEntityUpdates = new ArrayList<>(serverWorld.entities.size());
@@ -252,7 +252,7 @@ public class GameManager {
                                 if (entityRemoved.contains(entity.getSerial())) continue;
                                 initEntityUpdates.add(new EntityUpdate(UpdateType.CREATE, entity));
                             }
-                            client.out.write(new WorldEntityUpdate(initEntityUpdates));
+                            client.out.write(new WorldEntityUpdateData(initEntityUpdates));
                         }
                     } else {
                         // Send entity update
@@ -271,7 +271,7 @@ public class GameManager {
                         client.playerOut.reset();
                         String err = client.playerErr.toString(StandardCharsets.UTF_8);
                         client.playerErr.reset();
-                        client.out.write(new PlayerConsoleOutput(out.isBlank() ? null : out, err.isBlank() ? null : err));
+                        client.out.write(new PlayerConsoleData(out.isBlank() ? null : out, err.isBlank() ? null : err));
                     }
                 } catch (IOException e) {
 //                logger.warning(e.getMessage());

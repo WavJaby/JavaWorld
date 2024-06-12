@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 
 @Serializable
 @AllArgsConstructor
-public class PlayerConsoleOutput extends PlayerConsoleOutputSerializer {
+public class PlayerConsoleData extends PlayerConsoleOutputSerializer {
     public final String log;
     public final String error;
 }
