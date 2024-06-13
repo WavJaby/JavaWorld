@@ -25,7 +25,7 @@ public class ClientGameManager {
     private final World world;
     private final ClientGameEvent event;
 
-    private boolean closed = false;
+    private boolean closed;
     private Socket socket;
     private TCPDataReader in;
     private TCPDataWriter out;
@@ -39,6 +39,7 @@ public class ClientGameManager {
         this.event = event;
         reciverThread = new Thread(this::receiver, "ServerConnection");
         world = new World(System.currentTimeMillis());
+        closed = true;
     }
 
     private void calculateEntityUpdate(WorldEntityUpdateData entityUpdate) {
@@ -141,6 +142,7 @@ public class ClientGameManager {
     }
 
     public ServerResponseData connect(String playerName) {
+        closed = false;
         socket = new Socket();
         try {
             socket.connect(new InetSocketAddress(host, port), 1000);
@@ -165,9 +167,9 @@ public class ClientGameManager {
         if (closed) return;
         closed = true;
         try {
-            in.close();
-            out.close();
-            socket.close();
+            if (in != null) in.close();
+            if (out != null) out.close();
+            if (socket != null) socket.close();
         } catch (IOException ignore) {
         }
 

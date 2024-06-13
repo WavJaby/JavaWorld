@@ -4,67 +4,9 @@ A world written in Java
 
 Players can "only" control themselves using Java code
 
-## Player code template
+## For player
 
-```java
-
-
-public class Main extends PlayerApplication {
-    @Override
-    public void init(Self self) {
-        console.println("Init");
-    }
-
-    @Override
-    public void gameUpdate(Self self) {
-        console.println("Update");
-    }
-}
-```
-
-### Player code example (move)
-
-```java
-import com.almasb.fxgl.core.math.Vec2;
-
-import java.text.DecimalFormat;
-
-public class Main extends PlayerApplication {
-    private static final DecimalFormat formatter = new DecimalFormat("0.0");
-    private long time;
-
-    @Override
-    public void init(Self self) {
-        time = self.getWorld().getTime();
-        // Move player
-        self.moveTo(new Vec2(5, 0));
-    }
-
-    @Override
-    public void gameUpdate(Self self) {
-        World world = self.getWorld();
-        // Print every second
-        if (world.getTime() - time > 1000) {
-            time = world.getTime();
-            // Print current position and move state
-            console.println(vectorFormat(self.getPosition()) + " " + self.isMoving());
-        }
-    }
-
-    private String vectorFormat(Vec2 pos) {
-        return "[" + formatter.format(pos.x) + ", " + formatter.format(pos.y) + "]";
-    }
-}
-```
-
-#### Console out
-
-```text
-[1.0, 0.0] true
-[2.0, 0.0] true
-[3.0, 0.0] true
-[4.0, 0.0] true
-[5.0, 0.0] false
-```
-
+- Use JavaWorldSDK for develop game code. [JavaWorldSDK](https://github.com/Andrewtangtang/JavaWorldFrontend/releases/latest)
+- JavaWorldSDK doc. [JavaWorldAdapter](JavaWorldAdapter/src/main/java/com/javaworld/adapter)
+- Player example code. [ExampleCode](PlayerExample/src/main/java/com)
 
