@@ -206,8 +206,8 @@ public class GameManager {
                 if (client.player != null) continue;
                 // Player init
                 Random random = new Random();
-//                client.player = new Self(client.name, new Vec2(random.nextInt(16) + 0.5f, random.nextInt(16) + 0.5f));
-                client.player = new Self(client.name, new Vec2(0.5f, 0.5f));
+                client.player = new Self(client.name, new Vec2(random.nextInt(16) + 0.5f, random.nextInt(16) + 0.5f));
+//                client.player = new Self(client.name, new Vec2(0.5f, 0.5f));
                 playerJoin(client.player);
             }
 

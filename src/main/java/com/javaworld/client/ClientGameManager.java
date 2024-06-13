@@ -45,7 +45,7 @@ public class ClientGameManager {
         for (EntityUpdate update : entityUpdate.toEntityUpdates()) {
             switch (update.type) {
                 case CREATE -> {
-                    Entity entity = update.toEntity();
+                    Entity entity = update.getEntity();
                     world.createEntity(update.entitySerial, entity);
                     event.entityCreate(entity);
                 }
@@ -127,13 +127,16 @@ public class ClientGameManager {
         } catch (IOException e) {
             return new ServerResponseData(false, e.getMessage());
         }
+        ServerResponseData codeCompileResult;
         synchronized (codeCompileResultLock) {
             try {
-                while (codeCompileResult == null)
+                while (this.codeCompileResult == null)
                     codeCompileResultLock.wait();
             } catch (InterruptedException ignore) {
             }
         }
+        codeCompileResult = this.codeCompileResult;
+        this.codeCompileResult = null;
         return codeCompileResult;
     }
 

@@ -61,8 +61,12 @@ public class ClientHandler implements Runnable {
             closeCompiled();
             playerApplicationInit = false;
             // Player stop code
-            if (playerCode.sourceCode == null)
+            if (playerCode.sourceCode == null) {
+                compiled = null;
+                playerOut = null;
+                playerErr = null;
                 return new ServerResponseData(true, null);
+            }
             // Compile new code
             CompiledResult result = compiler.compileCode(playerCode.sourceCode);
             logger.info("[" + name + "] Code compiled");

@@ -39,7 +39,7 @@ public class EntityUpdate {
         this.playerName = entity.playerName;
     }
 
-    public Entity toEntity() {
+    public Entity getEntity() {
         EntityData entityData = EntityData.getEntityData(namespaceId, entityId);
         if (entityData.entityType == EntityType.PLAYER)
             return new Player(playerName, entityPosition, entityDirection);
