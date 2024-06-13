@@ -8,7 +8,7 @@ import java.util.List;
 
 @Serializable
 @AllArgsConstructor
-public class PlayerScoreUpdateData extends PlayerScoreUpdateSerializer {
+public class PlayerScoreUpdateData extends PlayerScoreUpdateDataSerializer {
     public final String[] playerNames;
     public final int[] playerScore;
 

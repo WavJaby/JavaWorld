@@ -13,7 +13,7 @@ import java.util.List;
 
 @Serializable
 @AllArgsConstructor
-public class WorldEntityUpdateData extends WorldEntityUpdateSerializer {
+public class WorldEntityUpdateData extends WorldEntityUpdateDataSerializer {
     public final byte[] updateType;
     public final int[] entitySerials;
     // (x,y,dir)[]

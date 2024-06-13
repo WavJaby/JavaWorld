@@ -10,7 +10,7 @@ import java.util.List;
 
 @Serializable
 @AllArgsConstructor
-public class WorldBlockUpdateData extends WorldBlockUpdateSerializer {
+public class WorldBlockUpdateData extends WorldBlockUpdateDataSerializer {
     public final byte[] updateType;
     public final int[] blockData;
 

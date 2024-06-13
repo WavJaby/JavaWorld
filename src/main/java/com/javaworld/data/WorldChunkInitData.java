@@ -15,7 +15,7 @@ import static com.javaworld.adapter.block.Chunk.CHUNK_SIZE;
 
 @Serializable
 @AllArgsConstructor
-public class WorldChunkInitData extends WorldChunkInitSerializer {
+public class WorldChunkInitData extends WorldChunkInitDataSerializer {
     public static final int chunkDataLength = 2 + Chunk.CHUNK_SIZE * Chunk.CHUNK_SIZE * Chunk.CHUNK_HEIGHT * 2;
     public final int[] chunkData;
 
