@@ -19,7 +19,7 @@ import java.util.logging.Logger;
 public class Server implements ClientEvent {
     private static final Logger logger = Logger.getLogger(Server.class.getSimpleName());
     public static final int port = 25567;
-    public static final LiveCompiler compiler = new LiveCompiler(new File("JavaWorldSDK-1.0.0-SNAPSHOT.jar"));
+    public static final LiveCompiler compiler = new LiveCompiler(new File("JavaWorldSDK-1.0.0.jar"));
     private final ThreadPoolExecutor clientPool = (ThreadPoolExecutor)
             Executors.newFixedThreadPool(100, new CustomThreadFactory("Clients"));
     private final Map<String, ClientHandler> clients = new HashMap<>();

@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "com.wavjaby"
-version = "1.0.0-SNAPSHOT"
+version = "1.0.0"
 
 repositories {
     mavenCentral()
@@ -14,6 +14,7 @@ tasks.register<Jar>("JavaWorldSDK") {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     includeEmptyDirs = false
     archiveBaseName = "JavaWorldSDK"
+    destinationDirectory = file("../build/libs")
 
     from(sourceSets.main.get().output)
 

@@ -15,3 +15,8 @@ Players can "only" control themselves using Java code
 - JavaWorldSDK doc. [JavaWorldAdapter](JavaWorldAdapter/src/main/java/com/javaworld/adapter)
 - Player example code. [ExampleCode](PlayerExample/src/main/java/com/player)
 
+## Build and Run server
+
+```shell
+gradlew clean runServerJar
+```

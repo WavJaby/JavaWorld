@@ -4,13 +4,21 @@ plugins {
 }
 
 group = "com.wavjaby"
-version = "1.0.0-SNAPSHOT"
+version = "1.0.0"
 
 repositories {
     mavenCentral()
 }
 
+tasks.register<JavaExec>("runServerJar") {
+    dependsOn("JavaWorldServer")
+    classpath = files(tasks["JavaWorldServer"])
+    workingDir = file("build/libs")
+}
+
 tasks.register<Jar>("JavaWorldServer") {
+    dependsOn(":JavaWorldAdapter:JavaWorldSDK")
+
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     includeEmptyDirs = false
     archiveBaseName = "JavaWorldServer"
@@ -22,7 +30,7 @@ tasks.register<Jar>("JavaWorldServer") {
     from(sourceSets.main.get().output)
 
     configurations["runtimeClasspath"].forEach { file: File ->
-        println(file.path)
+//        println(file.path)
         if (file.nameWithoutExtension.startsWith("JavaWorldAdapter") ||
             file.nameWithoutExtension.startsWith("Serializer")
         )
