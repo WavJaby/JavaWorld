@@ -25,11 +25,11 @@ public class ClientTest implements ClientGameEvent {
         GameManager.loadResources();
         logger.info("Resources done " + (System.currentTimeMillis() - startTime) + "ms");
 
-        ClientGameManager gm = new ClientGameManager("localhost", 25565, this);
+        ClientGameManager gm = new ClientGameManager("localhost", 25567, this);
 
         logger.info("Connecting Server...");
         long start = System.currentTimeMillis();
-        ServerResponseData response = gm.connect("Player");
+        ServerResponseData response = gm.connect("Thief");
         if (response == null) {
             logger.severe("Unknown Error");
             return;
@@ -39,7 +39,7 @@ public class ClientTest implements ClientGameEvent {
         }
         logger.info("Server Connected! " + (System.currentTimeMillis() - start) + "ms");
 
-        response = gm.sendPlayerCode(Files.readString(Path.of("../PlayerExample/src/main/java/com/player/Main.java")));
+        response = gm.sendPlayerCode(Files.readString(Path.of("../PlayerExample/src/main/java/com/player/Thief.java")));
 //        if (response == null) {
 //            logger.severe("Unknown Error");
 //            return;

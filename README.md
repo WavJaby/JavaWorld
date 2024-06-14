@@ -8,6 +8,8 @@ Players can "only" control themselves using Java code
 
 
 ![Main Title Screen](https://raw.githubusercontent.com/Andrewtangtang/JavaWorldFrontend/main/others/game_title_screen.png)
+![Game Play](https://raw.githubusercontent.com/Andrewtangtang/JavaWorldFrontend/main/others/game_play.png)
+![Game UI](https://raw.githubusercontent.com/Andrewtangtang/JavaWorldFrontend/main/others/game_play_ui.png)
 
 ## For player
 
